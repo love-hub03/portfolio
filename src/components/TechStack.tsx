@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
 import {
   BallCollider,
   Physics,
@@ -31,24 +30,12 @@ const imageUrls = [
 
 const textures = imageUrls.map((url) => textureLoader.load(url));
 
-const sphereGeometry = new THREE.SphereGeometry(1, 24, 24);
+const sphereGeometry = new THREE.SphereGeometry(1, 20, 20);
 
 // KEEPING 30 SPHERES
 const spheres = [...Array(30)].map(() => ({
   scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
 }));
-
-function isWebGLAvailable() {
-  try {
-    const canvas = document.createElement("canvas");
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
-    );
-  } catch {
-    return false;
-  }
-}
 
 type SphereProps = {
   vec?: THREE.Vector3;
@@ -78,9 +65,9 @@ function SphereGeo({
       .normalize()
       .multiply(
         new THREE.Vector3(
-          -50 * delta * scale,
-          -150 * delta * scale,
-          -50 * delta * scale
+          -45 * delta * scale,
+          -130 * delta * scale,
+          -45 * delta * scale
         )
       );
 
@@ -151,11 +138,8 @@ function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
 
 const TechStack = () => {
   const [isActive, setIsActive] = useState(false);
-  const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
-    setWebglSupported(isWebGLAvailable());
-
     const handleScroll = () => {
       const section = document.querySelector(".techstack");
       if (!section) return;
@@ -168,7 +152,6 @@ const TechStack = () => {
     handleScroll();
 
     const clickIntervals: number[] = [];
-
     const links = document.querySelectorAll(".header a");
     const clickHandlers: Array<() => void> = [];
 
@@ -209,49 +192,36 @@ const TechStack = () => {
           map: texture,
           emissive: "#ffffff",
           emissiveMap: texture,
-          emissiveIntensity: 0.25,
-          metalness: 0.4,
-          roughness: 0.95,
-          clearcoat: 0.08,
+          emissiveIntensity: 0.2,
+          metalness: 0.3,
+          roughness: 1,
+          clearcoat: 0.05,
         })
     );
   }, []);
-
-  if (!webglSupported) {
-    return (
-      <div className="techstack">
-        <h2> My Techstack</h2>
-      </div>
-    );
-  }
 
   return (
     <div className="techstack">
       <h2> My Techstack</h2>
 
       <Canvas
-        dpr={[1, 1.5]}
+        dpr={[1, 1.25]}
         gl={{
           alpha: true,
-          antialias: true,
-          powerPreference: "default",
+          antialias: false,
+          powerPreference: "high-performance",
           preserveDrawingBuffer: false,
         }}
         camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
         onCreated={(state) => {
-          state.gl.toneMappingExposure = 1.2;
+          state.gl.toneMappingExposure = 1.05;
         }}
         className="tech-canvas"
       >
-        <ambientLight intensity={1.2} />
-        <spotLight
-          position={[20, 20, 25]}
-          penumbra={1}
-          angle={0.2}
-          color="white"
-          castShadow={false}
-        />
-        <directionalLight position={[0, 5, -4]} intensity={1.8} />
+        {/* lighter lighting, no environment map */}
+        <ambientLight intensity={1.6} />
+        <directionalLight position={[3, 5, 8]} intensity={1.5} />
+        <pointLight position={[-6, -2, 6]} intensity={1.2} />
 
         <Physics gravity={[0, 0, 0]}>
           <Pointer isActive={isActive} />
@@ -264,8 +234,6 @@ const TechStack = () => {
             />
           ))}
         </Physics>
-
-        <Environment preset="city" />
       </Canvas>
     </div>
   );
