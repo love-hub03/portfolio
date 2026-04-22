@@ -1,18 +1,16 @@
 /* ============================================================
    TechStackFallback.css
-   Premium "glass tech orbs" fallback for the TechStack section.
-   Rendered when WebGL is unavailable or while the 3D chunk is
-   still streaming in. Designed to look intentional and luxury —
-   a hand-composed constellation, not a sticker scatter.
+   Premium "glass tech orbs" fallback with:
+   - floating glass orbs
+   - subtle parallax
+   - cursor proximity repulsion
    ============================================================ */
 
 .techstack-fallback {
-  /* .techstack base (height: var(--vh)) is inherited from index.css. */
   position: relative;
   overflow: hidden;
   isolation: isolate;
 
-  /* Warm accent palette — falls back to the site accent. */
   --tsf-accent: var(--accentColor, #ffa066);
   --tsf-accent-soft: rgba(255, 150, 90, 0.22);
   --tsf-accent-strong: rgba(255, 130, 60, 0.55);
@@ -21,12 +19,12 @@
   --tsf-glass-face-2: rgba(255, 255, 255, 0.02);
   --tsf-rim: rgba(255, 255, 255, 0.22);
 
-  /* Parallax vars (JS writes these on mousemove; 0 otherwise). */
+  /* Section parallax vars */
   --mx: 0;
   --my: 0;
 }
 
-/* -------- Ambient accent glow layers -------- */
+/* -------- Ambient glows -------- */
 .tsf-ambient {
   position: absolute;
   z-index: 0;
@@ -35,6 +33,7 @@
   filter: blur(90px);
   opacity: 0.85;
 }
+
 .tsf-ambient-a {
   width: 55%;
   height: 55%;
@@ -46,6 +45,7 @@
     transparent 70%
   );
 }
+
 .tsf-ambient-b {
   width: 60%;
   height: 60%;
@@ -58,13 +58,13 @@
   );
 }
 
-/* -------- Heading sits above ambient glow -------- */
+/* -------- Heading -------- */
 .techstack-fallback h2 {
   z-index: 2;
   letter-spacing: 4px;
 }
 
-/* -------- Stage containing the constellation -------- */
+/* -------- Stage -------- */
 .tsf-stage {
   position: absolute;
   top: 230px;
@@ -77,41 +77,44 @@
 }
 
 /* ============================================================
-   ORB
-   Each orb is a small absolutely-positioned stack:
-     .tsf-orb          -> outer positioner + parallax translate
-       .tsf-orb-halo   -> soft warm backlight behind the glass
-       .tsf-orb-glass  -> the glass sphere (backdrop blur + gloss)
-         img           -> tech logo, centered
-         .tsf-orb-spec -> specular highlight on top
-         .tsf-orb-rim  -> inner rim catch-light
+   ORB CONTAINER
+   Includes:
+   - center positioning
+   - section parallax
+   - cursor repulsion
    ============================================================ */
-
 .tsf-orb {
   position: absolute;
-  transform: translate(-50%, -50%);
   pointer-events: auto;
   will-change: transform;
-  /* outer transform = centering + mouse parallax.
-     inner float animation lives on .tsf-orb-glass so we don't
-     fight two keyframed transforms on the same element. */
+
   transform:
     translate(-50%, -50%)
     translate(
-      calc(var(--mx) * var(--parallax, 0) * 1px),
-      calc(var(--my) * var(--parallax, 0) * 1px)
+      calc(var(--mx) * var(--parallax, 0) * 1px + var(--push-x, 0px)),
+      calc(var(--my) * var(--parallax, 0) * 1px + var(--push-y, 0px))
     );
-  transition: transform 180ms ease-out;
+
+  transition: transform 220ms ease-out;
 }
 
-/* Size tiers — hero (anchor), primary (diamond), accent (outer).
-   Using discrete tiers instead of random px values is what makes
-   the layout read as composed rather than scattered. */
-.tsf-orb--hero    { width: 150px; height: 150px; }
-.tsf-orb--primary { width: 110px; height: 110px; }
-.tsf-orb--accent  {  width: 82px; height:  82px; }
+/* Size tiers */
+.tsf-orb--hero {
+  width: 150px;
+  height: 150px;
+}
 
-/* -------- Halo: soft warm backlight behind each orb -------- */
+.tsf-orb--primary {
+  width: 110px;
+  height: 110px;
+}
+
+.tsf-orb--accent {
+  width: 82px;
+  height: 82px;
+}
+
+/* -------- Halo -------- */
 .tsf-orb-halo {
   position: absolute;
   inset: -30%;
@@ -119,16 +122,17 @@
   z-index: 0;
   background: radial-gradient(
     circle,
-    var(--tsf-accent-soft) 0%,
+    rgba(255, 150, 90, calc(0.18 + var(--hit, 0) * 0.18)) 0%,
     rgba(255, 150, 90, 0.08) 40%,
     transparent 70%
   );
   filter: blur(14px);
   opacity: 0.9;
   pointer-events: none;
+  transition: background 180ms ease-out, filter 180ms ease-out;
 }
 
-/* -------- Glass: the actual sphere -------- */
+/* -------- Glass Sphere -------- */
 .tsf-orb-glass {
   position: absolute;
   inset: 0;
@@ -136,12 +140,9 @@
   overflow: hidden;
   z-index: 1;
 
-  /* Real glassmorphism — blurs whatever ambient glow sits behind it. */
   backdrop-filter: blur(10px) saturate(130%);
   -webkit-backdrop-filter: blur(10px) saturate(130%);
 
-  /* Layered glass face: top-left bright highlight, falling to a
-     darker bottom-right to sell spherical depth. */
   background:
     radial-gradient(
       circle at 32% 26%,
@@ -164,16 +165,15 @@
   border: 1px solid var(--tsf-rim);
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.55),
-    0 0 50px rgba(255, 140, 70, 0.18),
+    0 0 calc(50px + var(--hit, 0) * 18px) rgba(255, 140, 70, calc(0.18 + var(--hit, 0) * 0.18)),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     inset 0 -24px 40px rgba(0, 0, 0, 0.35);
 
-  /* Floating animation — every orb has its own --dur and --delay. */
   animation: tsf-float var(--dur, 10s) ease-in-out var(--delay, 0s) infinite;
-  transition: box-shadow 300ms ease, border-color 300ms ease;
+  transition: box-shadow 220ms ease-out, border-color 220ms ease-out, transform 220ms ease-out;
 }
 
-/* Logo inside the orb — centered, padded, subtle shadow for contrast. */
+/* Logo */
 .tsf-orb-glass img {
   position: absolute;
   inset: 22%;
@@ -188,7 +188,7 @@
   z-index: 2;
 }
 
-/* Specular highlight — the bright "wet" catch-light at the top-left. */
+/* Specular highlight */
 .tsf-orb-spec {
   position: absolute;
   top: 8%;
@@ -208,8 +208,7 @@
   z-index: 3;
 }
 
-/* Inner rim catch-light — a thin warm arc along the bottom-right
-   suggesting light wrapping around the sphere from a warm source. */
+/* Inner rim */
 .tsf-orb-rim {
   position: absolute;
   inset: 0;
@@ -221,7 +220,7 @@
   z-index: 4;
 }
 
-/* Hover lift — desktop only. Slight glow intensification. */
+/* Hover */
 @media (hover: hover) and (pointer: fine) {
   .tsf-orb-glass:hover {
     border-color: rgba(255, 200, 160, 0.4);
@@ -234,23 +233,22 @@
 }
 
 /* ============================================================
-   Float animation.
-   A very small Y-drift + tiny rotation to keep it premium and
-   not chaotic. Every orb has its own --dur so nothing pulses
-   in lockstep.
+   Float animation
    ============================================================ */
 @keyframes tsf-float {
-  0%   { transform: translateY(0)      rotate(0deg);    }
-  50%  { transform: translateY(-12px)  rotate(1.5deg);  }
-  100% { transform: translateY(0)      rotate(0deg);    }
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg) scale(calc(1 + var(--hit, 0) * 0.03));
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
 }
 
 /* ============================================================
-   Responsive.
-   On tablets: shrink orbs a touch and lift the stage.
-   On phones: hide the outermost accents so the composition
-   still reads as a balanced diamond instead of a cramped
-   overlap.
+   Responsive
    ============================================================ */
 @media screen and (max-width: 1024px) {
   .tsf-stage {
@@ -258,9 +256,21 @@
     bottom: 30px;
     width: 95%;
   }
-  .tsf-orb--hero    { width: 120px; height: 120px; }
-  .tsf-orb--primary { width:  92px; height:  92px; }
-  .tsf-orb--accent  { width:  68px; height:  68px; }
+
+  .tsf-orb--hero {
+    width: 120px;
+    height: 120px;
+  }
+
+  .tsf-orb--primary {
+    width: 92px;
+    height: 92px;
+  }
+
+  .tsf-orb--accent {
+    width: 68px;
+    height: 68px;
+  }
 }
 
 @media screen and (max-width: 640px) {
@@ -268,18 +278,28 @@
     top: 160px;
     bottom: 20px;
   }
-  .tsf-orb--hero    { width:  98px; height:  98px; }
-  .tsf-orb--primary { width:  76px; height:  76px; }
-  .tsf-orb--accent  { width:  58px; height:  58px; }
 
-  /* Drop the three widest outer orbs so the composition doesn't
-     press against the screen edges. */
+  .tsf-orb--hero {
+    width: 98px;
+    height: 98px;
+  }
+
+  .tsf-orb--primary {
+    width: 76px;
+    height: 76px;
+  }
+
+  .tsf-orb--accent {
+    width: 58px;
+    height: 58px;
+  }
+
   .tsf-orb--hide-mobile {
     display: none;
   }
 }
 
-/* Respect user motion preferences. */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .tsf-orb-glass {
     animation: none;
