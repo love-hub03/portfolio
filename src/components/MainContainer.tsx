@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import About from "./About";
 import Career from "./Career";
 import Contact from "./Contact";
@@ -7,13 +7,12 @@ import GirlCharacter from "./GirlCharacter";
 import Landing from "./Landing";
 import Navbar from "./Navbar";
 import SocialIcons from "./SocialIcons";
+import TechStackSafe from "./TechStackSafe";
 import WhatIDo from "./WhatIDo";
 import Work from "./Work";
 import setSplitText from "./utils/splitText";
 import { useLoading } from "../context/LoadingProvider";
 import { setProgress } from "./Loading";
-
-const TechStack = lazy(() => import("./TechStack"));
 
 const MainContainer = () => {
   const [isDesktopView, setIsDesktopView] = useState<boolean>(
@@ -81,11 +80,7 @@ const MainContainer = () => {
               <GirlCharacter />
             </div>
 
-            {isDesktopView && (
-              <Suspense fallback={<div>Loading....</div>}>
-                <TechStack />
-              </Suspense>
-            )}
+            {isDesktopView && <TechStackSafe />}
 
             <WhatIDo />
             <Career />
