@@ -54,7 +54,7 @@ type Orb = {
 const orbs: Orb[] = [
   // hero — the anchor of the whole composition
   {
-    src: "/images/react.webp",
+    src: "/images/reacts.png",
     x: 50,
     y: 48,
     tier: "hero",
@@ -64,7 +64,7 @@ const orbs: Orb[] = [
   },
   // inner diamond
   {
-    src: "/images/typescript.webp",
+    src: "/images/typescripts.png",
     x: 26,
     y: 30,
     tier: "primary",
@@ -73,7 +73,7 @@ const orbs: Orb[] = [
     parallax: 20,
   },
   {
-    src: "/images/next.webp",
+    src: "/images/nextjss.png",
     x: 74,
     y: 30,
     tier: "primary",
@@ -81,17 +81,9 @@ const orbs: Orb[] = [
     delay: -3.0,
     parallax: 20,
   },
+  
   {
-    src: "/images/node.webp",
-    x: 26,
-    y: 66,
-    tier: "primary",
-    dur: 12,
-    delay: -4.0,
-    parallax: 20,
-  },
-  {
-    src: "/images/mongo.webp",
+    src: "/images/mongoss.png",
     x: 74,
     y: 66,
     tier: "primary",
@@ -101,7 +93,7 @@ const orbs: Orb[] = [
   },
   // outer accent ring
   {
-    src: "/images/javascript.webp",
+    src: "/images/js.png",
     x: 50,
     y: 14,
     tier: "accent",
@@ -110,18 +102,18 @@ const orbs: Orb[] = [
     parallax: 12,
     hideOnMobile: true,
   },
+  // {
+  //   src: "/images/mysql.webp",
+  //   x: 8,
+  //   y: 48,
+  //   tier: "accent",
+  //   dur: 12.5,
+  //   delay: -3.4,
+  //   parallax: 10,
+  //   hideOnMobile: true,
+  // },
   {
-    src: "/images/mysql.webp",
-    x: 8,
-    y: 48,
-    tier: "accent",
-    dur: 12.5,
-    delay: -3.4,
-    parallax: 10,
-    hideOnMobile: true,
-  },
-  {
-    src: "/images/express.webp",
+    src: "/images/express.png",
     x: 92,
     y: 48,
     tier: "accent",
@@ -130,15 +122,15 @@ const orbs: Orb[] = [
     parallax: 10,
     hideOnMobile: true,
   },
-  {
-    src: "/images/nextBL.webp",
-    x: 34,
-    y: 84,
-    tier: "accent",
-    dur: 10.2,
-    delay: -2.2,
-    parallax: 14,
-  },
+  // {
+  //   src: "/images/nextBL.webp",
+  //   x: 34,
+  //   y: 84,
+  //   tier: "accent",
+  //   dur: 10.2,
+  //   delay: -2.2,
+  //   parallax: 14,
+  // },
   {
     src: "/images/react2.webp",
     x: 66,
