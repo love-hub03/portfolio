@@ -210,25 +210,34 @@
 
 @media (max-width: 1024px) {
   .girl-glow {
-    width: 180px;
-    height: 180px;
-    filter: blur(24px);
+    width: 220px;
+    height: 220px;
+    filter: blur(28px);
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 8%;
   }
 
-  /* Mobile/tablet: centered, static, no animations. Sits inside the
-     Landing area (first 100vh of the stage). CSS alone centers her
-     horizontally — no GSAP transform is applied on this breakpoint. */
   .girl-character {
-    top: 0;
-    bottom: auto;
+    position: absolute;
     left: 50%;
+    bottom: 0;
+    top: auto;
     transform: translateX(-50%) !important;
-    height: var(--vh);
-    max-width: 85vw;
+
+    width: min(88vw, 360px);
+    height: auto;
+    max-width: none;
+    max-height: 72vh;
+
+    object-fit: contain;
+    object-position: center bottom;
+
     opacity: 1 !important;
-    /* No will-change or perspective tricks — she's a plain image here. */
     animation: none !important;
     transition: none !important;
+
+    z-index: 20;
   }
 }
 /* ---------- /Shared Hero + About stage ---------- */
