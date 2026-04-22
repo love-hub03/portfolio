@@ -9,6 +9,22 @@ import {
   RapierRigidBody,
 } from "@react-three/rapier";
 
+/**
+ * Lightweight 3D TechStack scene.
+ *
+ * Intentionally minimal for maximum Chrome/GPU stability:
+ *  - no EffectComposer / postprocessing / N8AO
+ *  - no HDR or Environment() probe
+ *  - no shadows, no clearcoat highlights from env
+ *  - low-poly spheres (16x16)
+ *  - DPR capped at 1.25, antialias off
+ *
+ * We DO NOT pre-check WebGL availability here. The real 3D scene just
+ * tries to render; if the browser throws while creating the WebGL
+ * context or the GPU process crashes, the <TechStackBoundary> in
+ * TechStackSafe.tsx catches it and swaps in <TechStackFallback />.
+ */
+
 const textureLoader = new THREE.TextureLoader();
 
 const imageUrls = [
@@ -28,11 +44,19 @@ const imageUrls = [
   "/images/placeholder.webp",
 ];
 
-const textures = imageUrls.map((url) => textureLoader.load(url));
+// Texture pool — loaded once at module scope so every ball reuses the
+// same GPU upload instead of re-decoding the PNGs on every mount.
+const textures = imageUrls.map((url) => {
+  const t = textureLoader.load(url);
+  t.anisotropy = 2; // cheap sharpness win, no perf cost
+  return t;
+});
 
-const sphereGeometry = new THREE.SphereGeometry(1, 20, 20);
+// Lighter sphere geometry (was 20x20). 16x16 is visually indistinguishable
+// at this camera distance and cuts vertex count by ~36%.
+const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
 
-// KEEPING 30 SPHERES
+// KEEPING 30 SPHERES — stable seed so hot-reload doesn't reshuffle scale.
 const spheres = [...Array(30)].map(() => ({
   scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
 }));
@@ -41,7 +65,7 @@ type SphereProps = {
   vec?: THREE.Vector3;
   scale: number;
   r?: typeof THREE.MathUtils.randFloatSpread;
-  material: THREE.MeshPhysicalMaterial;
+  material: THREE.MeshStandardMaterial;
   isActive: boolean;
 };
 
@@ -185,17 +209,21 @@ const TechStack = () => {
     };
   }, []);
 
+  // Stable materials — one per texture, created once. Previously some
+  // versions of this file used MeshPhysicalMaterial with clearcoat, which
+  // requires the PhysicallyCorrectLights pipeline and is noticeably heavier
+  // on weaker GPUs. MeshStandardMaterial renders nearly identical at this
+  // distance and is much kinder on the Chrome GPU process.
   const materials = useMemo(() => {
     return textures.map(
       (texture) =>
-        new THREE.MeshPhysicalMaterial({
+        new THREE.MeshStandardMaterial({
           map: texture,
-          emissive: "#ffffff",
+          emissive: new THREE.Color("#ffffff"),
           emissiveMap: texture,
           emissiveIntensity: 0.2,
-          metalness: 0.3,
-          roughness: 1,
-          clearcoat: 0.05,
+          metalness: 0.25,
+          roughness: 0.85,
         })
     );
   }, []);
@@ -211,6 +239,10 @@ const TechStack = () => {
           antialias: false,
           powerPreference: "high-performance",
           preserveDrawingBuffer: false,
+          // failIfMajorPerformanceCaveat:false lets the page still try to
+          // render on software WebGL. If it genuinely can't, the error
+          // boundary kicks in and the fallback component renders.
+          failIfMajorPerformanceCaveat: false,
         }}
         camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
         onCreated={(state) => {

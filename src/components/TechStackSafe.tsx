@@ -1,18 +1,21 @@
 import { Component, lazy, ReactNode, Suspense } from "react";
+import TechStackFallback from "./TechStackFallback";
 
 const TechStack = lazy(() => import("./TechStack"));
 
 /**
- * Error boundary wrapping TechStack. WebGL context creation throws
- * synchronously inside Three.js when the browser can't (or won't)
- * allocate a context — Chrome with hardware acceleration off, GPU
- * sandbox crashes, old devices, headless crawlers, etc. Without this
- * boundary, that throw bubbles up and unmounts the entire React tree,
- * giving the visitor a blank page.
+ * Error boundary wrapping the real 3D TechStack.
  *
- * By containing the failure here, the rest of the portfolio continues
- * to render normally — the visitor just sees an empty "My Techstack"
- * heading instead of the 3D scene.
+ * Chrome in particular can throw synchronously during WebGL context
+ * creation (GPU process crash, blocklist, hardware acceleration off,
+ * driver bug, headless environment, etc.). Three.js surfaces that as
+ * a thrown Error from inside the React render tree — without this
+ * boundary it unmounts the entire portfolio and the visitor sees a
+ * blank page.
+ *
+ * Instead of bailing out with an empty heading, we fall back to a
+ * pure-CSS premium <TechStackFallback /> section that keeps the page
+ * looking intentional and recruiter-safe.
  */
 class TechStackBoundary extends Component<
   { children: ReactNode },
@@ -25,18 +28,18 @@ class TechStackBoundary extends Component<
   }
 
   componentDidCatch(err: unknown) {
-    // Keep the signal in the console but don't let it crash the app.
+    // Keep the signal in the console so we can still diagnose, but
+    // don't let it crash the app.
     // eslint-disable-next-line no-console
-    console.warn("TechStack disabled: WebGL unavailable.", err);
+    console.warn(
+      "TechStack 3D disabled, using CSS fallback (likely WebGL unavailable):",
+      err
+    );
   }
 
   render() {
     if (this.state.failed) {
-      return (
-        <div className="techstack">
-          <h2> My Techstack</h2>
-        </div>
-      );
+      return <TechStackFallback />;
     }
     return this.props.children;
   }
@@ -45,7 +48,10 @@ class TechStackBoundary extends Component<
 export default function TechStackSafe() {
   return (
     <TechStackBoundary>
-      <Suspense fallback={<div>Loading....</div>}>
+      {/* While the heavy three/rapier chunk streams in, show the
+          premium fallback too — it matches the final layout so there
+          is no jarring swap on slow connections. */}
+      <Suspense fallback={<TechStackFallback />}>
         <TechStack />
       </Suspense>
     </TechStackBoundary>
