@@ -212,7 +212,9 @@
   .girl-glow {
     position: absolute;
     left: 50%;
-    top: 58%;
+    /* Anchored inside the Landing area (first 100vh of stage), not the
+       whole .hero-about-stage (which also contains About). */
+    top: calc(var(--vh) / 2);
     bottom: auto;
     width: 220px;
     height: 220px;
@@ -225,14 +227,21 @@
   .girl-character {
     position: absolute;
     left: 50%;
-    top: 8%;
+    /* Vertically center on the Landing viewport. Landing has
+       height: var(--vh) and is the first child of .hero-about-stage,
+       so top = vh/2 = middle of Landing. Image sits between the
+       "LOVEPREET SAINI" block (top) and the "A Creative Web Developer"
+       block (bottom) without ever crossing into About below. */
+    top: calc(var(--vh) / 2);
     bottom: auto;
     transform: translate(-50%, -50%) !important;
 
     width: min(72vw, 300px);
     height: auto;
     max-width: none;
-    max-height: 48vh;
+    /* Hard-cap so she can't grow tall enough to collide with the
+       name above or tagline below. */
+    max-height: 55vh;
 
     object-fit: contain;
     object-position: center center;
@@ -241,7 +250,9 @@
     animation: none !important;
     transition: none !important;
 
-    z-index: 20;
+    /* Behind the text blocks (which use z-index: 9) so name/tagline
+       stay readable over her sweater. */
+    z-index: 5;
     pointer-events: none;
   }
 }
@@ -326,6 +337,18 @@ h2.landing-info-h2 {
   font-weight: 600;
   position: relative;
   margin-left: -5px;
+  /* Children are now <span> (valid HTML). Use flex so the two words
+     sit side-by-side with controlled spacing instead of relying on
+     the old block <div> auto-stacking behaviour. */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.landing-h2-info,
+.landing-h2-info-2 {
+  display: inline-block;
 }
 .landing-h2-2 {
   position: absolute;
