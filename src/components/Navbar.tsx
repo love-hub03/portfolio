@@ -25,18 +25,24 @@ const Navbar = () => {
     smoother.scrollTop(0);
     smoother.paused(true);
 
-    let links = document.querySelectorAll(".header ul a");
-    links.forEach((elem) => {
-      let element = elem as HTMLAnchorElement;
-      element.addEventListener("click", (e) => {
-        if (window.innerWidth > 1024) {
-          e.preventDefault();
-          let elem = e.currentTarget as HTMLAnchorElement;
-          const section = elem.getAttribute("data-href");
-          if (section) smoother.scrollTo(section, true, "top top");
-        }
-      });
-    });
+   const links = document.querySelectorAll(".header ul a");
+
+links.forEach((link) => {
+  const anchor = link as HTMLAnchorElement;
+
+  anchor.addEventListener("click", (e) => {
+    if (window.innerWidth > 1024) {
+      e.preventDefault();
+
+      const currentLink = e.currentTarget as HTMLAnchorElement;
+      const section = currentLink.getAttribute("data-href");
+
+      if (section) {
+        smoother?.scrollTo(section, true, "top top");
+      }
+    }
+  });
+});
     window.addEventListener("resize", () => {
       ScrollSmoother.refresh(true);
     });
