@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
-import { EffectComposer, N8AO } from "@react-three/postprocessing";
 import {
   BallCollider,
   Physics,
@@ -12,6 +11,7 @@ import {
 } from "@react-three/rapier";
 
 const textureLoader = new THREE.TextureLoader();
+
 const imageUrls = [
   "/images/express.webp",
   "/images/javascript.webp",
@@ -28,13 +28,27 @@ const imageUrls = [
   "/images/typescript.webp",
   "/images/placeholder.webp",
 ];
+
 const textures = imageUrls.map((url) => textureLoader.load(url));
 
-const sphereGeometry = new THREE.SphereGeometry(1, 28, 28);
+const sphereGeometry = new THREE.SphereGeometry(1, 24, 24);
 
+// KEEPING 30 SPHERES
 const spheres = [...Array(30)].map(() => ({
   scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
 }));
+
+function isWebGLAvailable() {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
 
 type SphereProps = {
   vec?: THREE.Vector3;
@@ -54,10 +68,13 @@ function SphereGeo({
   const api = useRef<RapierRigidBody | null>(null);
 
   useFrame((_state, delta) => {
-    if (!isActive) return;
+    if (!isActive || !api.current) return;
+
     delta = Math.min(0.1, delta);
+
+    const position = api.current.translation();
     const impulse = vec
-      .copy(api.current!.translation())
+      .set(position.x, position.y, position.z)
       .normalize()
       .multiply(
         new THREE.Vector3(
@@ -67,7 +84,7 @@ function SphereGeo({
         )
       );
 
-    api.current?.applyImpulse(impulse, true);
+    api.current.applyImpulse(impulse, true);
   });
 
   return (
@@ -86,8 +103,8 @@ function SphereGeo({
         args={[0.15 * scale, 0.275 * scale]}
       />
       <mesh
-        castShadow
-        receiveShadow
+        castShadow={false}
+        receiveShadow={false}
         scale={scale}
         geometry={sphereGeometry}
         material={material}
@@ -106,7 +123,8 @@ function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
   const ref = useRef<RapierRigidBody>(null);
 
   useFrame(({ pointer, viewport }) => {
-    if (!isActive) return;
+    if (!isActive || !ref.current) return;
+
     const targetVec = vec.lerp(
       new THREE.Vector3(
         (pointer.x * viewport.width) / 2,
@@ -115,7 +133,8 @@ function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
       ),
       0.2
     );
-    ref.current?.setNextKinematicTranslation(targetVec);
+
+    ref.current.setNextKinematicTranslation(targetVec);
   });
 
   return (
@@ -132,37 +151,57 @@ function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
 
 const TechStack = () => {
   const [isActive, setIsActive] = useState(false);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
-    // Activate the physics sim when the TechStack section itself is anywhere
-    // in the viewport (tolerant entry/exit). Previously this was gated on
-    // #work being above the scroll position, which was only true back when
-    // TechStack rendered AFTER Work. Now that TechStack sits between About
-    // and WhatIDo, we key activation off the section's own bounding rect.
+    setWebglSupported(isWebGLAvailable());
+
     const handleScroll = () => {
       const section = document.querySelector(".techstack");
       if (!section) return;
+
       const rect = section.getBoundingClientRect();
       const inView = rect.top < window.innerHeight && rect.bottom > 0;
       setIsActive(inView);
     };
+
     handleScroll();
-    document.querySelectorAll(".header a").forEach((elem) => {
-      const element = elem as HTMLAnchorElement;
-      element.addEventListener("click", () => {
-        const interval = setInterval(() => {
+
+    const clickIntervals: number[] = [];
+
+    const links = document.querySelectorAll(".header a");
+    const clickHandlers: Array<() => void> = [];
+
+    links.forEach((elem) => {
+      const handler = () => {
+        const interval = window.setInterval(() => {
           handleScroll();
         }, 10);
-        setTimeout(() => {
-          clearInterval(interval);
+
+        clickIntervals.push(interval);
+
+        window.setTimeout(() => {
+          window.clearInterval(interval);
         }, 1000);
-      });
+      };
+
+      clickHandlers.push(handler);
+      elem.addEventListener("click", handler);
     });
+
     window.addEventListener("scroll", handleScroll);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
+
+      links.forEach((elem, index) => {
+        elem.removeEventListener("click", clickHandlers[index]);
+      });
+
+      clickIntervals.forEach((id) => window.clearInterval(id));
     };
   }, []);
+
   const materials = useMemo(() => {
     return textures.map(
       (texture) =>
@@ -170,54 +209,63 @@ const TechStack = () => {
           map: texture,
           emissive: "#ffffff",
           emissiveMap: texture,
-          emissiveIntensity: 0.3,
-          metalness: 0.5,
-          roughness: 1,
-          clearcoat: 0.1,
+          emissiveIntensity: 0.25,
+          metalness: 0.4,
+          roughness: 0.95,
+          clearcoat: 0.08,
         })
     );
   }, []);
+
+  if (!webglSupported) {
+    return (
+      <div className="techstack">
+        <h2> My Techstack</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="techstack">
       <h2> My Techstack</h2>
 
       <Canvas
-        shadows
-        gl={{ alpha: true, stencil: false, depth: false, antialias: false }}
+        dpr={[1, 1.5]}
+        gl={{
+          alpha: true,
+          antialias: true,
+          powerPreference: "default",
+          preserveDrawingBuffer: false,
+        }}
         camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
-        onCreated={(state) => (state.gl.toneMappingExposure = 1.5)}
+        onCreated={(state) => {
+          state.gl.toneMappingExposure = 1.2;
+        }}
         className="tech-canvas"
       >
-        <ambientLight intensity={1} />
+        <ambientLight intensity={1.2} />
         <spotLight
           position={[20, 20, 25]}
           penumbra={1}
           angle={0.2}
           color="white"
-          castShadow
-          shadow-mapSize={[512, 512]}
+          castShadow={false}
         />
-        <directionalLight position={[0, 5, -4]} intensity={2} />
+        <directionalLight position={[0, 5, -4]} intensity={1.8} />
+
         <Physics gravity={[0, 0, 0]}>
           <Pointer isActive={isActive} />
           {spheres.map((props, i) => (
             <SphereGeo
               key={i}
               {...props}
-              material={materials[Math.floor(Math.random() * materials.length)]}
+              material={materials[i % materials.length]}
               isActive={isActive}
             />
           ))}
         </Physics>
-        <Environment
-          files="/models/char_enviorment.hdr"
-          environmentIntensity={0.5}
-          environmentRotation={[0, 4, 2]}
-        />
-        <EffectComposer enableNormalPass={false}>
-          <N8AO color="#0f002c" aoRadius={2} intensity={1.15} />
-        </EffectComposer>
+
+        <Environment preset="city" />
       </Canvas>
     </div>
   );
