@@ -215,16 +215,20 @@
     filter: blur(24px);
   }
 
-  /* On mobile/tablet, Landing and About stack vertically inside
-     .hero-about-stage. Default `bottom: 0` would pin the girl to the
-     bottom of the About section. Anchor her inside the Landing area
-     instead (first 100vh of the stage). object-position keeps her
-     feet on the landing floor. */
+  /* Mobile/tablet: centered, static, no animations. Sits inside the
+     Landing area (first 100vh of the stage). CSS alone centers her
+     horizontally — no GSAP transform is applied on this breakpoint. */
   .girl-character {
     top: 0;
     bottom: auto;
+    left: 50%;
+    transform: translateX(-50%) !important;
     height: var(--vh);
     max-width: 85vw;
+    opacity: 1 !important;
+    /* No will-change or perspective tricks — she's a plain image here. */
+    animation: none !important;
+    transition: none !important;
   }
 }
 /* ---------- /Shared Hero + About stage ---------- */

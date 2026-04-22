@@ -24,22 +24,11 @@ const GirlCharacter = () => {
     const img = imageRef.current;
     if (!img) return;
 
-    // Mobile layout stacks Landing above About vertically, not side-by-side,
-    // so the diagonal scroll tween (move from center to left, y from -aboutHeight
-    // to 0) doesn't apply. Show the image as a static hero element instead.
-    if (window.innerWidth <= 1024) {
-      gsap.set(img, { xPercent: -50, x: 0, y: 0, opacity: 0 });
-      gsap.to(img, {
-        opacity: 1,
-        duration: INTRO_FADE_DURATION,
-        ease: "power2.out",
-        delay: INTRO_DELAY,
-        onComplete: () => {
-          introDoneRef.current = true;
-        },
-      });
-      return;
-    }
+    // Mobile/tablet: no GSAP at all. The image is centered + pinned purely
+    // via CSS (transform: translateX(-50%)). Zero animations, zero scroll
+    // coupling, zero tween state. This guarantees she never drifts or
+    // reacts to scroll on touch devices.
+    if (window.innerWidth <= 1024) return;
 
     let ctx: gsap.Context | null = null;
     let rafId = 0;
