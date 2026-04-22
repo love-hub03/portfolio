@@ -78,7 +78,7 @@ const MainContainer = () => {
             <div className="hero-about-stage">
               <Landing />
               <About />
-              {isDesktopView && <GirlCharacter />}
+              <GirlCharacter />
             </div>
 
             {isDesktopView && (

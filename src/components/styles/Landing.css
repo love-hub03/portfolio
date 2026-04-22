@@ -208,15 +208,22 @@
     drop-shadow(0 0 40px rgba(255, 160, 102, 0.22));
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .girl-glow {
     width: 180px;
     height: 180px;
     filter: blur(24px);
   }
 
+  /* On mobile/tablet, Landing and About stack vertically inside
+     .hero-about-stage. Default `bottom: 0` would pin the girl to the
+     bottom of the About section. Anchor her inside the Landing area
+     instead (first 100vh of the stage). object-position keeps her
+     feet on the landing floor. */
   .girl-character {
-    height: 60vh;
+    top: 0;
+    bottom: auto;
+    height: var(--vh);
     max-width: 85vw;
   }
 }

@@ -24,6 +24,23 @@ const GirlCharacter = () => {
     const img = imageRef.current;
     if (!img) return;
 
+    // Mobile layout stacks Landing above About vertically, not side-by-side,
+    // so the diagonal scroll tween (move from center to left, y from -aboutHeight
+    // to 0) doesn't apply. Show the image as a static hero element instead.
+    if (window.innerWidth <= 1024) {
+      gsap.set(img, { xPercent: -50, x: 0, y: 0, opacity: 0 });
+      gsap.to(img, {
+        opacity: 1,
+        duration: INTRO_FADE_DURATION,
+        ease: "power2.out",
+        delay: INTRO_DELAY,
+        onComplete: () => {
+          introDoneRef.current = true;
+        },
+      });
+      return;
+    }
+
     let ctx: gsap.Context | null = null;
     let rafId = 0;
 
@@ -123,6 +140,11 @@ const GirlCharacter = () => {
   useEffect(() => {
     const img = imageRef.current;
     if (!img) return;
+
+    // Touch devices have no cursor — skip tracking entirely.
+    if (window.innerWidth <= 1024 || !window.matchMedia("(pointer: fine)").matches) {
+      return;
+    }
 
     const quickRX = gsap.quickTo(img, "rotateX", {
       duration: FOLLOW_DURATION,
