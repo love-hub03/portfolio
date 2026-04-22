@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { useLoading } from "../context/LoadingProvider";
-import { setProgress } from "./Loading";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
@@ -19,32 +17,7 @@ const FOLLOW_DURATION = 0.6;
 
 const GirlCharacter = () => {
   const imageRef = useRef<HTMLImageElement>(null);
-  const { setLoading } = useLoading();
   const introDoneRef = useRef(false);
-
-  // --- Loader progress ---
-  useEffect(() => {
-    const progress = setProgress((value) => setLoading(value));
-    const img = imageRef.current;
-    const finish = () => progress.loaded();
-
-    if (img) {
-      if (img.complete && img.naturalWidth > 0) {
-        finish();
-      } else {
-        img.addEventListener("load", finish);
-        img.addEventListener("error", finish);
-      }
-    }
-
-    return () => {
-      progress.clear();
-      if (img) {
-        img.removeEventListener("load", finish);
-        img.removeEventListener("error", finish);
-      }
-    };
-  }, [setLoading]);
 
   // --- Scroll animation: Landing -> About ---
   useEffect(() => {

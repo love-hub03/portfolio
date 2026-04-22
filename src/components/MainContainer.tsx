@@ -10,6 +10,8 @@ import SocialIcons from "./SocialIcons";
 import WhatIDo from "./WhatIDo";
 import Work from "./Work";
 import setSplitText from "./utils/splitText";
+import { useLoading } from "../context/LoadingProvider";
+import { setProgress } from "./Loading";
 
 const TechStack = lazy(() => import("./TechStack"));
 
@@ -17,6 +19,7 @@ const MainContainer = () => {
   const [isDesktopView, setIsDesktopView] = useState<boolean>(
     window.innerWidth > 1024
   );
+  const { setLoading } = useLoading();
 
   useEffect(() => {
     const resizeHandler = () => {
@@ -31,6 +34,37 @@ const MainContainer = () => {
       window.removeEventListener("resize", resizeHandler);
     };
   }, []);
+
+  // Loader progress — lives here (not inside GirlCharacter) so it runs on
+  // BOTH desktop and mobile. GirlCharacter is desktop-only, so if this
+  // logic stayed there, mobile visitors would be stuck at 0% forever.
+  // We preload /girl.png via the Image() constructor to match the original
+  // "wait for the hero asset" behaviour, then kick the bar to 100%.
+  useEffect(() => {
+    const progress = setProgress((value) => setLoading(value));
+    const finish = () => progress.loaded();
+
+    const img = new Image();
+    img.src = "/girl.png";
+    if (img.complete && img.naturalWidth > 0) {
+      finish();
+    } else {
+      img.addEventListener("load", finish);
+      img.addEventListener("error", finish);
+    }
+
+    // Safety net: if the asset somehow never resolves within 6s (flaky
+    // network, cache miss on mobile data), force-complete so visitors
+    // aren't staring at "Loading 0%" indefinitely.
+    const safety = window.setTimeout(finish, 6000);
+
+    return () => {
+      window.clearTimeout(safety);
+      img.removeEventListener("load", finish);
+      img.removeEventListener("error", finish);
+      progress.clear();
+    };
+  }, [setLoading]);
 
   return (
     <div className="container-main">
