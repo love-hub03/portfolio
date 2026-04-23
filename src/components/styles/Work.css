@@ -72,13 +72,14 @@
 .work-sticky {
   position: relative;
   width: 100%;
-  /* No forced 100vh — the sticky sizes to its content (card + a
-     small amount of breathing room), which kills the huge dead
-     zone that used to appear below each project. */
+  /* Full viewport. The pinned showcase must claim the whole screen
+     so nothing shows below it during the pinned phase — otherwise
+     the body background leaks through as a visible "dead space".
+     The card itself is centred inside this stage. */
+  height: 100vh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 20px 0 28px;
   box-sizing: border-box;
 }
 
