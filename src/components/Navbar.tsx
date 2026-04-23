@@ -11,25 +11,17 @@ gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
 export let smoother!: ScrollSmoother;
 
 /**
- * Minimal floating navigation chrome.
+ * Top horizontal navigation chrome.
  *
  * Desktop layout (see Navbar.css):
- *   top-left       .navbar-title   → brand logo
- *   far-right mid  .header > ul    → slim vertical glass pill,
- *                                    40px wide × ~320px tall, with
- *                                    ABOUT / WORK / CONTACT rotated
- *                                    90° inside
- *   far-right low  .navbar-connect → vertical-oriented email, a
- *                                    separate floating element
+ *   top-left    .navbar-title   → brand logo
+ *   top-centre  .header > ul    → horizontal glass pill with
+ *                                 ABOUT / WORK / CONTACT
+ *   top-right   .navbar-connect → email
  *
- * The `<ul>` IS the pill — there is no extra wrapper element. Keeping
- * the original `.header ul a` selector path means:
+ * The DOM shape (`.header ul a`) is deliberately preserved so:
  *   - initialFX.ts still fades `.header` in on load
  *   - the GSAP click handler below still finds every link
- *
- * HoverLinks is intentionally omitted: its two-layer slide effect is
- * designed for horizontal text and renders incorrectly when each
- * label is rotated via `writing-mode: vertical-rl`.
  */
 const Navbar = () => {
   useEffect(() => {
@@ -82,9 +74,9 @@ const Navbar = () => {
           Logo
         </a>
 
-        {/* The `<ul>` itself is the slim vertical pill (see CSS).
-            No wrapper — keeps the stacking simple and keeps the
-            selector `.header ul a` intact for the GSAP handler. */}
+        {/* Top-centre: horizontal glass pill. The `<ul>` IS the
+            pill — no wrapper. `.header ul a` selector preserved
+            for the GSAP click handler above. */}
         <ul>
           <li>
             <a data-href="#about" href="#about" data-cursor="disable">
@@ -103,8 +95,8 @@ const Navbar = () => {
           </li>
         </ul>
 
-        {/* Far-right low: vertical email, a SEPARATE floating
-            element from the pill. */}
+        {/* Top-right: email. `mailto:` so clicking actually opens
+            the user's email client. */}
         <a
           href="mailto:sainilove2208@gmail.com"
           className="navbar-connect"

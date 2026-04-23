@@ -1,29 +1,36 @@
 /* ============================================================
    Navbar.css
-   Slim floating navigation chrome.
+   Top horizontal navigation chrome.
 
-   Desktop shape (NOT a circle, NOT a card — a tall slim pill):
-     - pill width:  40px  (fixed)
-     - pill height: ~320px (auto from rotated labels)
-     - ratio roughly 1:8 — genuinely slim
+   Layout (CSS grid, 3 columns, 1fr | auto | 1fr):
+     ┌─────────────────────────────────────────────────────────┐
+     │ Logo            [ ABOUT  WORK  CONTACT ]          email │
+     └─────────────────────────────────────────────────────────┘
+        left col         centre col (pill)          right col
 
-   How the labels fit in 40px:
-     writing-mode: vertical-rl rotates each glyph 90°, so each
-     label's on-screen WIDTH is just the font-size line-box
-     (~14px) and its HEIGHT is the text length. That is what lets
-     the pill be this narrow.
+   The middle column is `auto`, so the pill sizes to its content
+   and the two `1fr` side columns push it to the exact centre of
+   the viewport no matter how wide the left/right labels are.
 
-   Nothing in the hero is touched — pill sits ~18px from the
-   right edge, well clear of the centre composition.
+   `.header` itself is pointer-events: none so the empty grid
+   gutters never steal clicks from the hero beneath. Each
+   interactive child re-enables pointer-events on itself.
    ============================================================ */
 
 .header {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 9999;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 22px 40px;
+
   pointer-events: none;
 
-  --nav-gutter: 40px;
   --nav-accent: var(--accentColor, #ffa066);
 }
 
@@ -31,9 +38,7 @@
    Top-left: brand logo
    ------------------------------------------------------------ */
 .navbar-title {
-  position: absolute;
-  top: 32px;
-  left: var(--nav-gutter);
+  justify-self: start;
   pointer-events: auto;
 
   font-family: "Poppins", "Geist", sans-serif;
@@ -52,38 +57,30 @@
 }
 
 /* ============================================================
-   THE PILL — the <ul> itself.
+   THE PILL — the centred horizontal glass capsule.
 
-   Fixed to the viewport so stacking is simple and predictable,
-   positioned hard against the right edge and vertically centred.
-   Fixed width of 40px guarantees it can never widen no matter
-   what's inside it.
+   The <ul> IS the pill. Fixed height keeps the chrome thin;
+   width grows naturally with its three labels but never feels
+   bloated thanks to the tight padding + gap.
    ============================================================ */
 .header ul {
-  /* Position directly on the viewport — no wrapper, no stacking
-     weirdness. */
-  position: fixed;
-  top: 50%;
-  right: 18px;
-  transform: translateY(-50%);
+  justify-self: center;
   pointer-events: auto;
-  z-index: 10000;
 
   list-style: none;
   margin: 0;
-  padding: 26px 0;
+  padding: 0 10px;
 
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 24px;
+  gap: 4px;
 
-  /* SLIM vertical pill. Fixed width; height grows with content
-     (which, thanks to rotated labels, is tall). */
-  width: 40px;
-  min-height: 300px;
+  height: 56px;
+  min-width: 280px;
+  max-width: 360px;
 
-  /* Dark glass surface. Thin border. Very rounded ends. */
+  /* Dark glass surface, very rounded ends. */
   background: rgba(22, 17, 22, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
@@ -91,14 +88,12 @@
   backdrop-filter: blur(14px) saturate(130%);
   -webkit-backdrop-filter: blur(14px) saturate(130%);
 
-  /* Shadow kept deliberately subtle — a big warm halo was what
-     made the previous version read as a glowing blob instead of
-     a crisp sidebar pill. */
   box-shadow:
     0 14px 32px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  transition: border-color 300ms ease, box-shadow 300ms ease;
+  transition: border-color 300ms ease, box-shadow 300ms ease,
+    transform 300ms ease;
 }
 .header ul:hover {
   border-color: rgba(255, 200, 160, 0.16);
@@ -111,179 +106,116 @@
 .header ul li {
   margin: 0;
   padding: 0;
+  flex: 1 1 auto;
   display: flex;
   justify-content: center;
 }
 
 /* ------------------------------------------------------------
-   Labels — rotated 90°.
-   writing-mode makes the glyphs stack vertically; the extra 180°
-   rotation flips reading direction to bottom-to-top, the
-   standard luxury-portfolio convention.
+   Labels — horizontal, slightly spaced caps.
    ------------------------------------------------------------ */
 .header ul li a {
   display: inline-block;
-
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  text-orientation: mixed;
-
-  padding: 2px;
+  padding: 10px 18px;
+  border-radius: 999px;
 
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 3px;
+  letter-spacing: 2.4px;
   text-transform: uppercase;
   color: #d7d0db;
   text-decoration: none;
+  white-space: nowrap;
 
-  transition: color 260ms ease, letter-spacing 260ms ease;
+  transition: color 240ms ease, background-color 240ms ease,
+    letter-spacing 240ms ease;
 }
 .header ul li a:hover {
   color: var(--nav-accent);
-  letter-spacing: 3.8px;
+  background: rgba(255, 160, 102, 0.08);
+  letter-spacing: 2.8px;
 }
 
 /* ============================================================
-   Far-right low: vertical email
-   A separate floating element — not inside the pill.
+   Top-right: email
    ============================================================ */
 .navbar-connect {
-  position: fixed;
-  right: 18px;
-  bottom: 36px;
-  top: auto;
-  left: auto;
+  justify-self: end;
   pointer-events: auto;
-  z-index: 10000;
-
-  display: block;
-  width: 40px; /* matches pill width so it aligns on the same axis */
-  text-align: center;
-
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
 
   font-family: "Roboto", "Geist", sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
-  letter-spacing: 2.5px;
+  letter-spacing: 0.4px;
   color: #bfb3ba;
   text-decoration: none;
 
-  transition: color 240ms ease, letter-spacing 240ms ease;
+  transition: color 240ms ease;
 }
 .navbar-connect:hover {
   color: var(--nav-accent);
-  letter-spacing: 3.2px;
-}
-/* Thin accent line above the email — anchors it to the pill
-   above without the two elements touching. */
-.navbar-connect::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 14px);
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(255, 160, 102, 0.5)
-  );
-  transform: translateX(-50%);
 }
 
 /* ============================================================
-   Short viewports — on laptops under ~760px tall, the pill and
-   the vertical email start crowding each other. Tighten both so
-   they stay clearly separate.
-   ============================================================ */
-@media (max-height: 760px) {
-  .header ul {
-    min-height: 260px;
-    gap: 18px;
-    padding: 22px 0;
-  }
-  .header ul li a {
-    font-size: 10.5px;
-    letter-spacing: 2.5px;
-  }
-  .navbar-connect {
-    bottom: 26px;
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
-  .navbar-connect::before {
-    display: none;
-  }
-}
-
-/* ============================================================
-   Tablets — tighten gutters slightly, keep the vertical pill.
+   Tablets
    ============================================================ */
 @media only screen and (max-width: 1024px) {
   .header {
-    --nav-gutter: 28px;
+    padding: 18px 28px;
   }
   .navbar-title {
-    top: 24px;
     font-size: 16px;
   }
   .header ul {
-    right: 14px;
-    width: 38px;
-    min-height: 280px;
+    height: 52px;
+    min-width: 260px;
+    padding: 0 8px;
+  }
+  .header ul li a {
+    padding: 9px 14px;
+    font-size: 11px;
+    letter-spacing: 2px;
   }
   .navbar-connect {
-    right: 14px;
-    width: 38px;
+    font-size: 12px;
   }
 }
 
 /* ============================================================
-   Phones — a tall right-edge sidebar is awkward on a 360px
-   wide screen. Flip the pill to a compact HORIZONTAL capsule
-   pinned to bottom-centre; un-rotate the labels so they read
-   normally; hide the vertical email (too much chrome for a
-   phone).
+   Phones — drop the email (too much chrome for a narrow screen),
+   keep the logo + horizontal pill. Pill stays centred and shrinks
+   to fit.
    ============================================================ */
 @media only screen and (max-width: 640px) {
+  .header {
+    padding: 16px 20px;
+    /* Collapse the right column so the pill can breathe; logo
+       stays left, pill goes centred with a true auto-centre. */
+    grid-template-columns: auto 1fr;
+  }
   .navbar-title {
-    top: 20px;
-    left: 22px;
     font-size: 15px;
   }
-
   .header ul {
-    top: auto;
-    right: auto;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%);
-
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-    min-height: 0;
-    padding: 10px 14px;
-    gap: 4px;
-
-    border-radius: 999px;
+    /* In the 2-col layout, the pill sits in the 1fr right
+       column and justify-self: end pushes it to the right edge,
+       which is a nicer small-screen placement than dead centre
+       (it lines up with the old `.navbar-connect` position). */
+    justify-self: end;
+    height: 46px;
+    min-width: 0;
+    padding: 0 4px;
+    gap: 0;
   }
-
   .header ul li a {
-    writing-mode: horizontal-tb;
-    transform: none;
-    padding: 8px 12px;
-    font-size: 10.5px;
-    letter-spacing: 2.5px;
+    padding: 8px 11px;
+    font-size: 10px;
+    letter-spacing: 1.8px;
   }
   .header ul li a:hover {
-    letter-spacing: 2.8px;
+    letter-spacing: 2px;
   }
-
   .navbar-connect {
     display: none;
   }
