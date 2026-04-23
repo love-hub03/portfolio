@@ -198,7 +198,7 @@ const TechStack = () => {
   return (
     <section className="techstack" ref={sectionRef}>
       <div className="ts-header">
-        <span className="ts-eyebrow">what I build with</span>
+        <span className="ts-eyebrow">what I use to build</span>
         <h2 className="ts-heading">My Tech Stack</h2>
       </div>
 

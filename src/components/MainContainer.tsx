@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import About from "./About";
-import Career from "./Career";
+// Career/experience section hidden for now — no professional experience
+// to showcase yet. Re-enable this import and the <Career /> render below
+// once there's something to put in it.
+// import Career from "./Career";
 import Contact from "./Contact";
 import Cursor from "./Cursor";
 import GirlCharacter from "./GirlCharacter";
@@ -86,7 +89,7 @@ const MainContainer = () => {
             <TechStackSafe />
 
             <WhatIDo />
-            <Career />
+            {/* <Career /> — hidden for now, no experience to list yet */}
             <Work />
 
             <Contact />

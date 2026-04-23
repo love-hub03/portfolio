@@ -1,210 +1,432 @@
-.work-section h2 {
-  margin-top: 100px;
-  font-size: 70px;
-  font-weight: 500;
-}
-.work-section h2 > span {
-  color: var(--accentColor);
-}
+/* ============================================================
+   Work.css
+   Sticky Stacked Cards scroll interaction.
+
+   Layout overview:
+     section.work-section
+       .work-intro                — eyebrow + heading + sub
+       .work-sticky               — pinned by ScrollTrigger
+         .work-stage              — centres cards; overflow:hidden
+           article.work-card × N  — absolutely stacked; animated by GSAP
+
+   Visual language:
+     - Large rounded project cards (28px radius) on dark glass.
+     - Two-column interior: media left, body right.
+     - Warm orange accents (buttons, tag outlines, hover).
+     - Glossy top sheen for the premium display-glass feel.
+   ============================================================ */
+
 .work-section {
-  transition: 0s;
-  height: 100vh;
-  box-sizing: border-box;
-  will-change: transform;
-}
-.work-container {
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  align-content: stretch;
-}
-.work-flex {
-  width: 100%;
-  display: flex;
-  height: 100%;
-  margin-left: -80px;
-  padding-right: 120px;
   position: relative;
+  width: 100%;
+  /* Section height itself stays natural; ScrollTrigger's pinSpacing
+     injects the scroll runway, so we don't need to hard-code a tall
+     outer wrapper. */
 }
-.work-box {
-  padding: 80px;
+
+/* ---- Intro block ------------------------------------------- */
+.work-intro {
+  text-align: center;
+  padding: 140px 0 60px;
+}
+.work-eyebrow {
+  display: inline-block;
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255, 160, 102, 0.85);
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 160, 102, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 160, 102, 0.05);
+}
+.work-heading {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin: 0 0 12px;
+  line-height: 1.05;
+  color: #f2ece9;
+}
+.work-heading > span {
+  background: linear-gradient(90deg, #ffa066 0%, #ffc496 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.work-sub {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 14px;
+  color: #a79ca6;
+  margin: 0;
+  letter-spacing: 0.4px;
+}
+
+/* ============================================================
+   Pinned sticky area — this is what GSAP pins during the stack
+   reveal. Full viewport so cards have a large canvas to live in.
+   ============================================================ */
+.work-sticky {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.work-stage {
+  position: relative;
+  width: min(1180px, 92vw);
+  /* Stage height caps the cards; overflow:hidden clips the card while
+     it's parked below so it never causes a scrollbar. */
+  height: min(680px, 78vh);
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+/* ============================================================
+   The card.
+
+   Each card is absolutely positioned to fill the stage exactly so
+   they all share the same rectangle. GSAP animates yPercent + scale
+   + opacity; we keep centring off the transform property so GSAP
+   owns transform entirely.
+   ============================================================ */
+.work-card {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 0;
+
+  border-radius: 28px;
+  overflow: hidden;
+  isolation: isolate;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 45%,
+      rgba(0, 0, 0, 0.35) 100%
+    ),
+    rgba(22, 17, 22, 0.78);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+
+  box-shadow:
+    0 40px 80px -30px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* GSAP owns transform; we set the origin so scale feels anchored
+     to the top edge (card sinking down, not drifting away). */
+  transform-origin: 50% 20%;
+  will-change: transform, opacity;
+}
+
+/* ---- Media column ------------------------------------------ */
+.work-card-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0e0a0f;
+}
+.work-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Subtle zoom on hover so the card reads as interactive. */
+  transform: scale(1.02);
+  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.work-card:hover .work-card-media img {
+  transform: scale(1.06);
+}
+
+/* Gentle gradient shade so copy stays readable near the seam. */
+.work-card-media-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(11, 8, 12, 0.55) 100%
+  );
+}
+
+/* ---- Body column ------------------------------------------- */
+.work-card-body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  width: 600px;
-  box-sizing: border-box;
-  border-right: 1px solid #363636;
-  flex-shrink: 0;
-  gap: 50px;
-  justify-content: start;
+  justify-content: center;
+  gap: 18px;
+  padding: 56px 60px;
 }
-.work-flex .work-box:nth-child(even) {
-  flex-direction: column-reverse;
-}
-.work-flex::before,
-.work-flex::after {
-  content: "";
-  width: calc(50000vw);
-  height: 1px;
-  background-color: #363636;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-}
-.work-flex::after {
-  top: 100%;
-}
-.work-title {
-  justify-content: space-between;
+
+.work-card-meta {
   display: flex;
-  width: 100%;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 14px;
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #bfb3ba;
 }
-.work-title > div {
-  text-align: right;
-}
-.work-title h3 {
-  font-size: 50px;
-  line-height: 50px;
-  margin: 0;
+.work-card-index {
+  color: rgba(255, 160, 102, 0.9);
   font-weight: 600;
 }
-
-.work-info h4 {
-  font-size: 18px;
-  font-weight: 400;
-  margin: 0;
-}
-.work-info p {
-  font-weight: 200;
-  color: #adacac;
-  margin: 0;
-  margin-top: 3px;
-}
-.work-info > p {
-  width: 90%;
-}
-.work-image {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-}
-.work-image-in {
+.work-card-category {
   position: relative;
+  padding-left: 14px;
 }
-.work-link {
+.work-card-category::before {
+  content: "";
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: var(--backgroundColor);
-  width: 50px;
-  border-radius: 50px;
-  height: 50px;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.work-card-title {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: clamp(28px, 3.4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  line-height: 1.08;
+  margin: 0;
+  color: #f6efe9;
+}
+
+.work-card-desc {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #bfb3ba;
+  margin: 0;
+  max-width: 46ch;
+}
+
+/* ---- Tech tags --------------------------------------------- */
+.work-card-tags {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.work-card-tag {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #d7d0db;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 280ms ease, color 280ms ease;
+}
+.work-card-tag:hover {
+  border-color: rgba(255, 160, 102, 0.5);
+  color: #ffa066;
+}
+
+/* ---- Action buttons ---------------------------------------- */
+.work-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+.work-card-btn {
+  display: inline-flex;
   align-items: center;
-  font-size: 25px;
-  box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.5),
-    inset 0px 0px 10px 0px #393939;
-  transition: 0.3s;
-  opacity: 0;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 999px;
+
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  transition: transform 260ms ease, background-color 260ms ease,
+    border-color 260ms ease, color 260ms ease, box-shadow 260ms ease;
 }
-.work-image a:hover {
-  color: inherit;
+.work-card-btn-primary {
+  background: linear-gradient(135deg, #ffa066 0%, #ff7a3c 100%);
+  color: #1a0f07;
+  box-shadow: 0 10px 28px -10px rgba(255, 140, 70, 0.55);
 }
-.work-image a:hover .work-link {
-  opacity: 1;
+.work-card-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -12px rgba(255, 140, 70, 0.7);
 }
-.work-image video {
+.work-card-btn-primary span {
+  transition: transform 260ms ease;
+}
+.work-card-btn-primary:hover span {
+  transform: translateX(4px);
+}
+.work-card-btn-ghost {
+  color: #d7d0db;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.work-card-btn-ghost:hover {
+  color: #ffa066;
+  border-color: rgba(255, 160, 102, 0.5);
+  background: rgba(255, 160, 102, 0.06);
+}
+
+/* ---- Glossy top sheen -------------------------------------- */
+.work-card-sheen {
   position: absolute;
-  width: 100%;
-  height: 100%;
   top: 0;
   left: 0;
-  background-color: #000;
-  object-fit: cover;
+  right: 0;
+  height: 38%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.03) 55%,
+    transparent 100%
+  );
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  mix-blend-mode: screen;
+  opacity: 0.85;
 }
-.work-image img {
-  max-width: 100%;
-  max-height: 350px;
-}
-@media only screen and (max-height: 900px) {
-  .work-image img {
-    max-height: 250px;
+
+/* ============================================================
+   Tablets
+   ============================================================ */
+@media only screen and (max-width: 1024px) {
+  .work-intro {
+    padding: 110px 0 48px;
   }
-  .work-box {
-    padding-top: 40px;
-    padding-bottom: 40px;
+  .work-stage {
+    width: 94vw;
+    height: 72vh;
+    border-radius: 24px;
   }
-  .work-section h2 {
-    font-size: 60px;
-    margin-bottom: 30px;
-    margin-top: 70px;
+  .work-card {
+    grid-template-columns: 1fr 1fr;
+    border-radius: 24px;
   }
-}
-@media only screen and (max-width: 1400px) {
-  .work-title h3 {
-    font-size: 35px;
+  .work-card-body {
+    padding: 40px 44px;
+    gap: 14px;
   }
-  .work-info p {
-    font-size: 13px;
+  .work-card-title {
+    font-size: clamp(24px, 3.2vw, 36px);
   }
-  .work-info h4 {
-    font-size: 15px;
-  }
-  .work-box {
-    width: 450px;
-    padding: 50px;
-  }
-  .work-flex {
-    margin-left: -50px;
-    padding-right: 75px;
-  }
-  .work-section h2 {
-    font-size: 50px;
-  }
-}
-@media only screen and (max-width: 1400px) {
-  .work-box {
-    width: 350px;
-    padding: 30px;
-  }
-  .work-flex {
-    margin-left: -30px;
-    padding-right: 45px;
+  .work-card-desc {
+    font-size: 14px;
   }
 }
 
-@media only screen and (max-height: 650px) {
-  .work-image img {
-    max-height: 200px;
+/* ============================================================
+   Phones — flip to a vertical card (image on top, body below),
+   tighten everything, shorten stage so one card still fits on
+   small screens.
+   ============================================================ */
+@media only screen and (max-width: 640px) {
+  .work-intro {
+    padding: 80px 0 36px;
   }
-  .work-section h2 {
-    font-size: 40px;
-    margin-bottom: 20px;
+  .work-sub {
+    font-size: 12.5px;
+    padding: 0 20px;
   }
-  .work-box {
-    gap: 20px;
+  .work-sticky {
+    height: 100vh;
+  }
+  .work-stage {
+    width: 92vw;
+    height: 82vh;
+    border-radius: 20px;
+  }
+  .work-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: 44% 56%;
+    border-radius: 20px;
+  }
+  .work-card-media-shade {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 55%,
+      rgba(11, 8, 12, 0.55) 100%
+    );
+  }
+  .work-card-body {
+    padding: 22px 22px 24px;
+    gap: 10px;
+  }
+  .work-card-title {
+    font-size: 22px;
+  }
+  .work-card-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    /* Clamp so very long copy doesn't push the buttons off-card. */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .work-card-tag {
+    font-size: 9.5px;
+    padding: 5px 9px;
+    letter-spacing: 1.2px;
+  }
+  .work-card-btn {
+    padding: 10px 16px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+  .work-card-sheen {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
   }
 }
-/* @media only screen and (max-width: 900px) {
-  .work-image img {
-    max-height: 200px;
+
+/* ============================================================
+   Reduced motion — no scrubbed reveal; show card 0 by default.
+   GSAP also bails out in the component, so this mostly keeps
+   hover polish calm.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .work-card-media img,
+  .work-card-btn,
+  .work-card-btn-primary span,
+  .work-card-tag {
+    transition: none;
   }
-  .work-section h2 {
-    font-size: 40px;
-    margin-bottom: 20px;
-  }
-  .work-box {
-    gap: 20px;
-  }
-} */
-@media only screen and (max-width: 1025px) {
-  .work-container {
-    align-content: normal;
-  }
-  .work-flex {
-    height: auto;
+  .work-card:hover .work-card-media img {
+    transform: scale(1.02);
   }
 }
