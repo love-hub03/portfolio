@@ -29,9 +29,9 @@
 /* ---- Intro block ------------------------------------------- */
 .work-intro {
   text-align: center;
-  /* Very tight — the stack should read almost immediately under the
-     navbar, not after a hero-sized gap. */
-  padding: 32px 24px 10px;
+  /* Minimal — heading + eyebrow only, no vertical breathing room.
+     The stack should read almost immediately under the navbar. */
+  padding: 18px 24px 4px;
 }
 .work-eyebrow {
   display: inline-block;
@@ -72,12 +72,11 @@
   width: 100%;
   height: 100vh;
   display: flex;
-  /* Flex-start + a small top pad puts the card right under the
-     navbar instead of floating at dead-centre with large empty space
-     above and below. */
+  /* Flex-start + minimal top pad puts the card right under the
+     navbar instead of floating at dead-centre with empty space. */
   align-items: flex-start;
   justify-content: center;
-  padding-top: clamp(70px, 9vh, 120px);
+  padding-top: clamp(30px, 4vh, 60px);
   box-sizing: border-box;
 }
 
@@ -258,16 +257,15 @@
   min-height: 0;
 }
 
-.work-card-main-media,
-.work-card-side-media {
+/* Main (large left) image still acts as a plain cover image. */
+.work-card-main-media {
   position: relative;
   overflow: hidden;
   border-radius: 18px;
   background: #0e0a0f;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
-.work-card-main-media img,
-.work-card-side-media img {
+.work-card-main-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -275,11 +273,11 @@
   transform: scale(1.02);
   transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.work-card:hover .work-card-main-media img,
-.work-card:hover .work-card-side-media img {
+.work-card:hover .work-card-main-media img {
   transform: scale(1.06);
 }
 
+/* Right column — two stacked mini project cards. */
 .work-card-side {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -287,67 +285,139 @@
   min-height: 0;
 }
 
-/* ---- Side-thumb text overlays -----------------------------
-   Both right-hand thumbnails carry a gradient overlay so text
-   sits legibly on top of the image. Top thumb carries the project
-   title; bottom thumb carries a short description. */
-.work-card-side-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+/* ============================================================
+   MINI PROJECT CARD
+   Each right-hand slot is now a full card, not a thumbnail:
+     - top row: number + category pill
+     - body: title / description / tech stack
+     - preview image sitting at the bottom
+   ============================================================ */
+.work-mini {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  border-radius: 16px;
+
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 8px;
+  padding: 12px 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(34, 24, 32, 0.9) 0%,
+      rgba(14, 10, 15, 0.95) 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 280ms ease, transform 280ms ease;
+}
+.work-mini:hover {
+  border-color: rgba(255, 180, 130, 0.28);
+}
+
+.work-mini-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.work-mini-num {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  line-height: 1;
+  color: #f6efe9;
+}
+.work-mini-cat {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #d7d0db;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.work-mini-body {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 14px 16px;
-  gap: 4px;
-
-  /* Dark-to-transparent shade from the bottom so the image still
-     reads through at the top. */
-  background: linear-gradient(
-    180deg,
-    rgba(11, 8, 12, 0) 35%,
-    rgba(11, 8, 12, 0.55) 70%,
-    rgba(11, 8, 12, 0.9) 100%
-  );
-
-  pointer-events: none;
+  gap: 3px;
+  min-width: 0;
 }
-.work-card-side-kicker {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255, 160, 102, 0.9);
-}
-.work-card-side-title {
+.work-mini-title {
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.2px;
   line-height: 1.15;
   margin: 0;
   color: #f6efe9;
-  /* Single-line clamp — keeps long titles from blowing the thumb. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
-.work-card-side-desc {
+.work-mini-desc {
   font-family: "Roboto", "Geist", sans-serif;
-  font-size: 11.5px;
-  font-weight: 400;
-  line-height: 1.45;
-  color: #d7d0db;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #a79ca6;
   margin: 0;
-
-  /* Soft 2-line clamp so copy always fits inside the thumb. */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+.work-mini-tech {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+.work-mini-tech-label {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 160, 102, 0.85);
+}
+.work-mini-tech-stack {
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 10.5px;
+  color: #bfb3ba;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Small preview image pinned to the bottom of the mini card.
+   `min-height: 0` lets the 1fr row actually shrink inside the
+   grid so the image never pushes body content out of view. */
+.work-mini-preview {
+  position: relative;
+  min-height: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0a070b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.work-mini-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.work-mini:hover .work-mini-preview img {
+  transform: scale(1.06);
 }
 
 /* ---- Sheen (top glossy highlight) -------------------------- */
@@ -376,10 +446,10 @@
    ============================================================ */
 @media only screen and (max-width: 1024px) {
   .work-intro {
-    padding: 26px 20px 8px;
+    padding: 14px 20px 4px;
   }
   .work-sticky {
-    padding-top: clamp(60px, 8vh, 100px);
+    padding-top: clamp(24px, 3.5vh, 48px);
   }
   .work-stage {
     width: 90vw;
@@ -394,18 +464,25 @@
   .work-card-mosaic {
     gap: 10px;
   }
-  .work-card-main-media,
-  .work-card-side-media {
+  .work-card-main-media {
     border-radius: 14px;
   }
-  .work-card-side-overlay {
+  .work-mini {
+    border-radius: 14px;
     padding: 10px 12px;
+    gap: 6px;
   }
-  .work-card-side-title {
-    font-size: 14px;
+  .work-mini-num {
+    font-size: 18px;
   }
-  .work-card-side-desc {
-    font-size: 11px;
+  .work-mini-title {
+    font-size: 13px;
+  }
+  .work-mini-desc {
+    font-size: 10.5px;
+  }
+  .work-mini-tech-stack {
+    font-size: 10px;
   }
   .work-card-num {
     font-size: 24px;
@@ -431,11 +508,11 @@
    ============================================================ */
 @media only screen and (max-width: 640px) {
   .work-intro {
-    padding: 22px 20px 6px;
+    padding: 12px 20px 4px;
   }
   .work-sticky {
     height: 100vh;
-    padding-top: clamp(50px, 6vh, 80px);
+    padding-top: clamp(16px, 2vh, 36px);
   }
   .work-stage {
     width: 92vw;
@@ -477,8 +554,7 @@
     grid-template-rows: 1.6fr 1fr;
     gap: 8px;
   }
-  .work-card-main-media,
-  .work-card-side-media {
+  .work-card-main-media {
     border-radius: 12px;
   }
   .work-card-side {
@@ -486,20 +562,34 @@
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
-  .work-card-side-overlay {
-    padding: 8px 10px;
-    gap: 2px;
+  .work-mini {
+    border-radius: 12px;
+    padding: 10px 11px;
+    gap: 6px;
   }
-  .work-card-side-kicker {
+  .work-mini-num {
+    font-size: 16px;
+  }
+  .work-mini-cat {
     font-size: 8.5px;
-    letter-spacing: 1.6px;
+    padding: 3px 8px;
+    letter-spacing: 1.3px;
   }
-  .work-card-side-title {
+  .work-mini-title {
     font-size: 12px;
   }
-  .work-card-side-desc {
-    font-size: 10.5px;
+  .work-mini-desc {
+    font-size: 10px;
     -webkit-line-clamp: 2;
+  }
+  .work-mini-tech-label {
+    font-size: 8px;
+  }
+  .work-mini-tech-stack {
+    font-size: 9.5px;
+  }
+  .work-mini-preview {
+    border-radius: 8px;
   }
   .work-card-sheen {
     border-top-left-radius: 18px;
@@ -513,13 +603,14 @@
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   .work-card-main-media img,
-  .work-card-side-media img,
+  .work-mini-preview img,
   .work-card-pill,
-  .work-card-pill-primary span {
+  .work-card-pill-primary span,
+  .work-mini {
     transition: none;
   }
   .work-card:hover .work-card-main-media img,
-  .work-card:hover .work-card-side-media img {
+  .work-mini:hover .work-mini-preview img {
     transform: scale(1.02);
   }
 }
