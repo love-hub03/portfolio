@@ -1,17 +1,20 @@
 /* ============================================================
    Navbar.css
-   Minimal floating navigation chrome.
+   Slim floating navigation chrome.
 
-   Layout:
-     top-left      .navbar-title     → brand logo
-     mid-right     .navbar-pill      → floating vertical glass pill
-     bottom-right  .navbar-connect   → vertical-oriented email
+   Desktop shape (NOT a circle, NOT a card — a tall slim pill):
+     - pill width:  40px  (fixed)
+     - pill height: ~320px (auto from rotated labels)
+     - ratio roughly 1:8 — genuinely slim
 
-   The outer `.header` is now a transparent full-viewport overlay
-   (position: fixed, inset: 0, pointer-events: none). Every child
-   re-enables pointer events so you can click them — but blank
-   areas between them pass pointer events through to the content
-   below.
+   How the labels fit in 40px:
+     writing-mode: vertical-rl rotates each glyph 90°, so each
+     label's on-screen WIDTH is just the font-size line-box
+     (~14px) and its HEIGHT is the text length. That is what lets
+     the pill be this narrow.
+
+   Nothing in the hero is touched — pill sits ~18px from the
+   right edge, well clear of the centre composition.
    ============================================================ */
 
 .header {
@@ -20,8 +23,6 @@
   z-index: 9999;
   pointer-events: none;
 
-  /* Respect the existing cMaxWidth layout var so brand + pill align
-     with the rest of the site's content rhythm. */
   --nav-gutter: 40px;
   --nav-accent: var(--accentColor, #ffa066);
 }
@@ -42,160 +43,185 @@
   color: #f2ece9;
   text-decoration: none;
 
-  /* Subtle warm glow so the logo feels lit, not flat. */
   text-shadow: 0 0 18px rgba(255, 160, 102, 0.15);
-  transition: color 240ms ease, text-shadow 240ms ease,
-    transform 240ms ease;
+  transition: color 240ms ease, text-shadow 240ms ease;
 }
 .navbar-title:hover {
   color: var(--nav-accent);
   text-shadow: 0 0 22px rgba(255, 160, 102, 0.35);
 }
 
-/* ------------------------------------------------------------
-   Mid-right: floating vertical glass pill
+/* ============================================================
+   THE PILL — the <ul> itself.
 
-   The `<ul>` itself becomes the pill surface — glassmorphism with
-   a thin rim light, soft inner highlight, and ambient warm glow.
-   Each link reads horizontally (ABOUT / WORK / CONTACT) stacked
-   vertically so the pill stays narrow and readable.
-   ------------------------------------------------------------ */
-.navbar-pill {
-  position: absolute;
+   Fixed to the viewport so stacking is simple and predictable,
+   positioned hard against the right edge and vertically centred.
+   Fixed width of 40px guarantees it can never widen no matter
+   what's inside it.
+   ============================================================ */
+.header ul {
+  /* Position directly on the viewport — no wrapper, no stacking
+     weirdness. */
+  position: fixed;
   top: 50%;
-  right: 28px;
+  right: 18px;
   transform: translateY(-50%);
   pointer-events: auto;
-}
+  z-index: 10000;
 
-.header ul {
   list-style: none;
   margin: 0;
-  padding: 24px 22px;
+  padding: 26px 0;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  min-width: 118px;
+  gap: 24px;
 
-  background: rgba(255, 255, 255, 0.035);
+  /* SLIM vertical pill. Fixed width; height grows with content
+     (which, thanks to rotated labels, is tall). */
+  width: 40px;
+  min-height: 300px;
+
+  /* Dark glass surface. Thin border. Very rounded ends. */
+  background: rgba(22, 17, 22, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
 
-  /* Real glassmorphism — blurs whatever hero content passes behind. */
-  backdrop-filter: blur(16px) saturate(130%);
-  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
 
+  /* Shadow kept deliberately subtle — a big warm halo was what
+     made the previous version read as a glowing blob instead of
+     a crisp sidebar pill. */
   box-shadow:
-    0 18px 45px rgba(0, 0, 0, 0.45),
-    0 0 38px rgba(255, 140, 70, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -18px 30px rgba(0, 0, 0, 0.25);
+    0 14px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   transition: border-color 300ms ease, box-shadow 300ms ease;
 }
-
-/* Hovering the pill itself lights it up ever so slightly — premium
-   cue that the whole element is interactive chrome. */
 .header ul:hover {
-  border-color: rgba(255, 200, 160, 0.18);
+  border-color: rgba(255, 200, 160, 0.16);
   box-shadow:
-    0 22px 55px rgba(0, 0, 0, 0.55),
-    0 0 52px rgba(255, 140, 70, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -18px 30px rgba(0, 0, 0, 0.25);
+    0 18px 40px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(255, 140, 70, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .header ul li {
   margin: 0;
   padding: 0;
-  width: 100%;
-}
-
-.header ul li a {
-  display: block;
-  text-align: center;
-  padding: 6px 10px;
-  color: #d7d0db;
-  font-family: "Poppins", "Geist", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: 999px;
-
-  transition: color 260ms ease, background-color 260ms ease,
-    box-shadow 260ms ease;
-}
-
-.header ul li a:hover {
-  color: var(--nav-accent);
-  background: rgba(255, 160, 102, 0.06);
-  box-shadow: 0 0 22px rgba(255, 160, 102, 0.18);
+  display: flex;
+  justify-content: center;
 }
 
 /* ------------------------------------------------------------
-   Bottom-right: vertical email
-
-   `writing-mode: vertical-rl` rotates the glyph baselines so the
-   string reads top-to-bottom along the right edge — the signature
-   "designer portfolio" side-label. Rotating 180deg additionally
-   flips it so you read bottom-to-top (more natural, eyes track
-   upward), which is the common luxury-portfolio convention.
+   Labels — rotated 90°.
+   writing-mode makes the glyphs stack vertically; the extra 180°
+   rotation flips reading direction to bottom-to-top, the
+   standard luxury-portfolio convention.
    ------------------------------------------------------------ */
+.header ul li a {
+  display: inline-block;
+
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-orientation: mixed;
+
+  padding: 2px;
+
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #d7d0db;
+  text-decoration: none;
+
+  transition: color 260ms ease, letter-spacing 260ms ease;
+}
+.header ul li a:hover {
+  color: var(--nav-accent);
+  letter-spacing: 3.8px;
+}
+
+/* ============================================================
+   Far-right low: vertical email
+   A separate floating element — not inside the pill.
+   ============================================================ */
 .navbar-connect {
-  position: absolute;
+  position: fixed;
+  right: 18px;
   bottom: 36px;
-  right: 22px;
+  top: auto;
+  left: auto;
   pointer-events: auto;
+  z-index: 10000;
 
   display: block;
+  width: 40px; /* matches pill width so it aligns on the same axis */
+  text-align: center;
 
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 
   font-family: "Roboto", "Geist", sans-serif;
-  font-size: 12px;
-  letter-spacing: 3px;
+  font-size: 11px;
   font-weight: 400;
+  letter-spacing: 2.5px;
   color: #bfb3ba;
   text-decoration: none;
-
-  /* Reset the old absolute-centered email styling. */
-  left: auto;
-  top: auto;
 
   transition: color 240ms ease, letter-spacing 240ms ease;
 }
 .navbar-connect:hover {
   color: var(--nav-accent);
-  letter-spacing: 4px;
+  letter-spacing: 3.2px;
 }
-/* Thin vertical accent line above the email so it feels anchored,
-   not floating. Uses the warm accent at low opacity. */
+/* Thin accent line above the email — anchors it to the pill
+   above without the two elements touching. */
 .navbar-connect::before {
   content: "";
   position: absolute;
   left: 50%;
   bottom: calc(100% + 14px);
   width: 1px;
-  height: 54px;
+  height: 40px;
   background: linear-gradient(
     to bottom,
     transparent,
     rgba(255, 160, 102, 0.5)
   );
-  transform: translateX(-50%) rotate(180deg);
+  transform: translateX(-50%);
 }
 
 /* ============================================================
-   Responsive
-   ------------------------------------------------------------
-   Tablets & smaller: tuck gutters, shrink pill.
-   Phones: flip the pill to a horizontal capsule pinned to the
-   bottom-center, hide the vertical email (too much chrome on
-   a small viewport), shrink logo.
+   Short viewports — on laptops under ~760px tall, the pill and
+   the vertical email start crowding each other. Tighten both so
+   they stay clearly separate.
+   ============================================================ */
+@media (max-height: 760px) {
+  .header ul {
+    min-height: 260px;
+    gap: 18px;
+    padding: 22px 0;
+  }
+  .header ul li a {
+    font-size: 10.5px;
+    letter-spacing: 2.5px;
+  }
+  .navbar-connect {
+    bottom: 26px;
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+  .navbar-connect::before {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Tablets — tighten gutters slightly, keep the vertical pill.
    ============================================================ */
 @media only screen and (max-width: 1024px) {
   .header {
@@ -205,25 +231,24 @@
     top: 24px;
     font-size: 16px;
   }
-  .navbar-pill {
-    right: 20px;
-  }
   .header ul {
-    padding: 20px 18px;
-    gap: 14px;
-    min-width: 104px;
-  }
-  .header ul li a {
-    font-size: 10.5px;
-    letter-spacing: 3px;
+    right: 14px;
+    width: 38px;
+    min-height: 280px;
   }
   .navbar-connect {
-    bottom: 28px;
-    right: 16px;
-    font-size: 11px;
+    right: 14px;
+    width: 38px;
   }
 }
 
+/* ============================================================
+   Phones — a tall right-edge sidebar is awkward on a 360px
+   wide screen. Flip the pill to a compact HORIZONTAL capsule
+   pinned to bottom-centre; un-rotate the labels so they read
+   normally; hide the vertical email (too much chrome for a
+   phone).
+   ============================================================ */
 @media only screen and (max-width: 640px) {
   .navbar-title {
     top: 20px;
@@ -231,28 +256,34 @@
     font-size: 15px;
   }
 
-  /* Flip the pill: bottom-center, horizontal orientation. */
-  .navbar-pill {
+  .header ul {
     top: auto;
     right: auto;
     bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
-  }
-  .header ul {
+
     flex-direction: row;
     align-items: center;
-    min-width: 0;
-    padding: 12px 18px;
-    gap: 6px;
+    width: auto;
+    min-height: 0;
+    padding: 10px 14px;
+    gap: 4px;
+
+    border-radius: 999px;
   }
+
   .header ul li a {
-    padding: 8px 14px;
+    writing-mode: horizontal-tb;
+    transform: none;
+    padding: 8px 12px;
     font-size: 10.5px;
     letter-spacing: 2.5px;
   }
+  .header ul li a:hover {
+    letter-spacing: 2.8px;
+  }
 
-  /* Email is too much chrome on a phone — hide it. */
   .navbar-connect {
     display: none;
   }

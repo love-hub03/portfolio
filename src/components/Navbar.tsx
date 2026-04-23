@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import HoverLinks from "./HoverLinks";
 import { gsap } from "gsap";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import "./styles/Navbar.css";
@@ -14,19 +13,23 @@ export let smoother!: ScrollSmoother;
 /**
  * Minimal floating navigation chrome.
  *
- * Layout (see Navbar.css):
- *   top-left    → brand logo
- *   mid-right   → floating vertical glass pill with ABOUT / WORK / CONTACT
- *   bottom-right → vertical-oriented email
+ * Desktop layout (see Navbar.css):
+ *   top-left       .navbar-title   → brand logo
+ *   far-right mid  .header > ul    → slim vertical glass pill,
+ *                                    40px wide × ~320px tall, with
+ *                                    ABOUT / WORK / CONTACT rotated
+ *                                    90° inside
+ *   far-right low  .navbar-connect → vertical-oriented email, a
+ *                                    separate floating element
  *
- * We deliberately keep the DOM structure identical to the original
- * horizontal navbar so:
- *   - initialFX.ts continues to fade `.header` in on load
- *   - the GSAP click handler below still finds `.header ul a`
- *   - HoverLinks continues to work untouched
+ * The `<ul>` IS the pill — there is no extra wrapper element. Keeping
+ * the original `.header ul a` selector path means:
+ *   - initialFX.ts still fades `.header` in on load
+ *   - the GSAP click handler below still finds every link
  *
- * The whole restyle lives in CSS — this file only wires the click
- * handler and renders the chrome elements.
+ * HoverLinks is intentionally omitted: its two-layer slide effect is
+ * designed for horizontal text and renders incorrectly when each
+ * label is rotated via `writing-mode: vertical-rl`.
  */
 const Navbar = () => {
   useEffect(() => {
@@ -70,8 +73,7 @@ const Navbar = () => {
   return (
     <>
       <div className="header">
-        {/* Top-left: brand. `navbar-title` is kept as the hook for the
-            existing cursor-disable + logo styling. */}
+        {/* Top-left: brand logo. */}
         <a
           href="./images/image.png"
           className="navbar-title"
@@ -80,33 +82,29 @@ const Navbar = () => {
           Logo
         </a>
 
-        {/* Mid-right: floating vertical glass pill.
-            Selector path `.header ul a` is preserved so the GSAP
-            smoother click handler above keeps working. */}
-        <nav className="navbar-pill" aria-label="Primary">
-          <ul>
-            <li>
-              <a data-href="#about" href="#about">
-                <HoverLinks text="ABOUT" />
-              </a>
-            </li>
-            <li>
-              <a data-href="#work" href="#work">
-                <HoverLinks text="WORK" />
-              </a>
-            </li>
-            <li>
-              <a data-href="#contact" href="#contact">
-                <HoverLinks text="CONTACT" />
-              </a>
-            </li>
-          </ul>
-        </nav>
+        {/* The `<ul>` itself is the slim vertical pill (see CSS).
+            No wrapper — keeps the stacking simple and keeps the
+            selector `.header ul a` intact for the GSAP handler. */}
+        <ul>
+          <li>
+            <a data-href="#about" href="#about" data-cursor="disable">
+              ABOUT
+            </a>
+          </li>
+          <li>
+            <a data-href="#work" href="#work" data-cursor="disable">
+              WORK
+            </a>
+          </li>
+          <li>
+            <a data-href="#contact" href="#contact" data-cursor="disable">
+              CONTACT
+            </a>
+          </li>
+        </ul>
 
-        {/* Bottom-right: vertical email. Class name preserved so the
-            existing cursor-disable attribute keeps applying. `href`
-            upgraded from "" to a real mailto so clicking actually
-            opens the user's email client. */}
+        {/* Far-right low: vertical email, a SEPARATE floating
+            element from the pill. */}
         <a
           href="mailto:sainilove2208@gmail.com"
           className="navbar-connect"
@@ -116,7 +114,7 @@ const Navbar = () => {
         </a>
       </div>
 
-      {/* Decorative / atmospheric elements — untouched. */}
+      {/* Decorative / atmospheric — untouched. */}
       <div className="landing-circle1"></div>
       <div className="landing-circle2"></div>
       <div className="nav-fade"></div>
