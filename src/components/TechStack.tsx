@@ -54,17 +54,17 @@ const row1: Card[] = [
 const row2: Card[] = [
   { src: "/images/express.png", label: "Express", tint: "rgba(255, 255, 255, 0.08)" },
   { src: "/images/firebases.png", label: "Firebase", tint: "rgba(255, 160, 60, 0.20)" },
-  { src: "/images/reacts.png", label: "React Native", tint: "rgba(97, 218, 251, 0.18)" },
-  { src: "/images/typescripts.png", label: "TS 5", tint: "rgba(49, 120, 198, 0.20)" },
-  { src: "/images/nextjss.png", label: "App Router", tint: "rgba(255, 255, 255, 0.10)" },
+  { src: "/images/reacts.png", label: "React", tint: "rgba(97, 218, 251, 0.18)" },
+  { src: "/images/typescripts.png", label: "TypeScript", tint: "rgba(49, 120, 198, 0.20)" },
+  { src: "/images/nextjss.png", label: "Next.js", tint: "rgba(255, 255, 255, 0.10)" },
 ];
 
 const row3: Card[] = [
-  { src: "/images/js.png", label: "ES2024", tint: "rgba(247, 223, 30, 0.18)" },
-  { src: "/images/mongoss.png", label: "Atlas", tint: "rgba(67, 153, 52, 0.18)" },
+  { src: "/images/js.png", label: "JavaScript", tint: "rgba(247, 223, 30, 0.18)" },
+  { src: "/images/mongoss.png", label: "MongoDB", tint: "rgba(67, 153, 52, 0.18)" },
   { src: "/images/firebases.png", label: "Firestore", tint: "rgba(255, 160, 60, 0.20)" },
-  { src: "/images/express.png", label: "REST / GQL", tint: "rgba(255, 160, 102, 0.18)" },
-  { src: "/images/reacts.png", label: "Hooks", tint: "rgba(97, 218, 251, 0.18)" },
+  { src: "/images/express.png", label: "Express", tint: "rgba(255, 160, 102, 0.18)" },
+  { src: "/images/reacts.png", label: "React", tint: "rgba(97, 218, 251, 0.18)" },
 ];
 
 type RowProps = {
