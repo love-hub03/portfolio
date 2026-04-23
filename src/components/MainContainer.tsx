@@ -6,6 +6,7 @@ import Cursor from "./Cursor";
 import GirlCharacter from "./GirlCharacter";
 import Landing from "./Landing";
 import Navbar from "./Navbar";
+import Particles from "./Particles";
 import SocialIcons from "./SocialIcons";
 import TechStackSafe from "./TechStackSafe";
 import WhatIDo from "./WhatIDo";
@@ -67,6 +68,10 @@ const MainContainer = () => {
 
   return (
     <div className="container-main">
+      {/* Ambient particle background — position: fixed, sits behind
+          all content. Must be rendered first so later position:fixed
+          siblings (cursor, navbar, smooth-wrapper) win DOM order. */}
+      <Particles />
       <Cursor />
       <Navbar />
       <SocialIcons />

@@ -1,0 +1,45 @@
+/* ============================================================
+   Particles.css
+   Full-viewport canvas that sits behind every section of the
+   portfolio.
+
+   Rendering order (from back to front):
+     body background (#0b080c, set by initialFX)
+       ↓
+     .particles-bg  (this canvas, position: fixed, z-index: 0)
+       ↓
+     everything else (content, smooth-wrapper, etc.)
+
+   The canvas uses `pointer-events: none` so it never intercepts
+   clicks or hover states — the rest of the site behaves as if it
+   isn't there.
+   ============================================================ */
+
+.particles-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Sits above the body background but below all content. Every
+     interactive/visible block in the portfolio either has its own
+     stacking context or a z-index > 0, so they naturally render
+     above this canvas. */
+  z-index: 0;
+  pointer-events: none;
+  /* Promote to its own compositor layer so animating the canvas
+     doesn't cause the rest of the page to re-paint. */
+  will-change: transform;
+  /* Subtle blending so the warm particles feel like they're glowing
+     through the bg instead of sitting on top of it. */
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* On small phones, drop the opacity a touch so the particles don't
+   compete with the hero content for attention. */
+@media screen and (max-width: 640px) {
+  .particles-bg {
+    opacity: 0.7;
+  }
+}
