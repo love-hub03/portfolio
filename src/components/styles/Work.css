@@ -1,37 +1,22 @@
-/* ============================================================
-   Work.css
-   Sticky Stacked Project Cards — single split-layout card design.
-
-   Card anatomy:
-     article.work-card
-       header.work-card-top
-         .work-card-num          → "01"
-         .work-card-actions      → Live Project pill + GitHub icon
-       .work-card-body           → 2-col grid: image | content
-         .work-card-image        → one large rounded screenshot
-         .work-card-content
-           h3.work-card-title
-           p.work-card-desc
-           .work-card-tech
-             .work-card-tech-label
-             .work-card-tech-pills
-               span.work-card-tech-pill × N
-       .work-card-sheen          → glossy top overlay
-
-   Scroll behaviour unchanged — .work-sticky gets pinned by GSAP for
-   (N-1) * 100vh of scroll, cards slide up one by one.
-   ============================================================ */
-
+/* =========================
+   WORK SECTION
+========================= */
 .work-section {
   position: relative;
   width: 100%;
+  padding-top: 24px;
 }
 
-/* ---- Intro block — tight so the stack reads right under nav. */
+/* =========================
+   INTRO
+========================= */
 .work-intro {
   text-align: center;
-  padding: 18px 24px 4px;
+  padding: 12px 24px 8px;
+  position: relative;
+  z-index: 5;
 }
+
 .work-eyebrow {
   display: inline-block;
   font-family: "Roboto", "Geist", sans-serif;
@@ -40,21 +25,23 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: rgba(255, 160, 102, 0.85);
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding: 6px 14px;
   border: 1px solid rgba(255, 160, 102, 0.25);
   border-radius: 999px;
   background: rgba(255, 160, 102, 0.05);
 }
+
 .work-heading {
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: clamp(34px, 5vw, 60px);
+  font-size: clamp(34px, 5vw, 64px);
   font-weight: 600;
   letter-spacing: -0.5px;
   margin: 0;
   line-height: 1.05;
   color: #f2ece9;
 }
+
 .work-heading > span {
   background: linear-gradient(90deg, #ffa066 0%, #ffc496 100%);
   -webkit-background-clip: text;
@@ -63,48 +50,39 @@
   color: transparent;
 }
 
-/* ============================================================
-   Pinned sticky stage.
-
-   flex-start + tiny padding-top keeps the card near the top of the
-   viewport instead of floating in a huge vertical gap.
-   ============================================================ */
+/* =========================
+   STICKY SHOWCASE AREA
+========================= */
 .work-sticky {
   position: relative;
   width: 100%;
-  /* Full viewport. The pinned showcase must claim the whole screen
-     so nothing shows below it during the pinned phase — otherwise
-     the body background leaks through as a visible "dead space".
-     The card itself is centred inside this stage. */
   height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* IMPORTANT FIX */
   justify-content: center;
+  padding-top: 18px; /* IMPORTANT FIX */
   box-sizing: border-box;
+  overflow: visible;
 }
 
 .work-stage {
   position: relative;
-  /* Card size — elegant, not oversized. */
-  width: min(1100px, 82vw);
-  height: min(480px, 60vh);
+  width: min(1120px, 84vw);
+  height: min(520px, 68vh); /* IMPORTANT FIX */
   overflow: hidden;
   border-radius: 28px;
 }
 
-/* ============================================================
-   THE CARD
-   Flex column: top bar, then split body, with a glossy sheen.
-   ============================================================ */
+/* =========================
+   CARD
+========================= */
 .work-card {
   position: absolute;
   inset: 0;
-
   display: flex;
   flex-direction: column;
   padding: 22px;
   gap: 18px;
-
   border-radius: 26px;
   overflow: hidden;
   isolation: isolate;
@@ -130,7 +108,9 @@
   will-change: transform, opacity;
 }
 
-/* ---- Top bar ---------------------------------------------- */
+/* =========================
+   TOP BAR
+========================= */
 .work-card-top {
   position: relative;
   z-index: 3;
@@ -140,6 +120,7 @@
   gap: 16px;
   padding: 2px 6px;
 }
+
 .work-card-num {
   font-family: "Poppins", "Geist", sans-serif;
   font-size: 28px;
@@ -148,20 +129,22 @@
   line-height: 1;
   color: #f6efe9;
 }
+
 .work-card-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* ---- Pill buttons ----------------------------------------- */
+/* =========================
+   BUTTONS
+========================= */
 .work-card-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
   border-radius: 999px;
-
   font-family: "Poppins", "Geist", sans-serif;
   font-size: 11px;
   font-weight: 600;
@@ -169,7 +152,6 @@
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
-
   transition:
     transform 240ms ease,
     background-color 240ms ease,
@@ -177,23 +159,28 @@
     color 240ms ease,
     box-shadow 240ms ease;
 }
+
 .work-card-pill-primary {
   color: #f6efe9;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
+
 .work-card-pill-primary:hover {
   color: #1a0f07;
   background: linear-gradient(135deg, #ffa066 0%, #ff7a3c 100%);
   border-color: transparent;
   box-shadow: 0 10px 26px -10px rgba(255, 140, 70, 0.55);
 }
+
 .work-card-pill-primary span {
   transition: transform 240ms ease;
 }
+
 .work-card-pill-primary:hover span {
   transform: translate(2px, -2px);
 }
+
 .work-card-pill-ghost {
   width: 38px;
   height: 38px;
@@ -203,15 +190,16 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
+
 .work-card-pill-ghost:hover {
   color: #ffa066;
   border-color: rgba(255, 160, 102, 0.5);
   background: rgba(255, 160, 102, 0.06);
 }
 
-/* ============================================================
-   BODY — image left (62%) + content right (38%).
-   ============================================================ */
+/* =========================
+   BODY LAYOUT
+========================= */
 .work-card-body {
   position: relative;
   flex: 1 1 auto;
@@ -221,33 +209,41 @@
   min-height: 0;
 }
 
-/* ---- Large image ------------------------------------------ */
+/* =========================
+   IMAGE
+========================= */
 .work-card-image {
   position: relative;
   overflow: hidden;
   border-radius: 18px;
   background: #0e0a0f;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 0;
 }
+
 .work-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* IMPORTANT */
   display: block;
   transform: scale(1.02);
   transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 .work-card:hover .work-card-image img {
   transform: scale(1.05);
 }
 
-/* ---- Right content ---------------------------------------- */
+/* =========================
+   CONTENT
+========================= */
 .work-card-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 14px;
   min-width: 0;
+  min-height: 0;
   padding: 4px 8px 4px 4px;
 }
 
@@ -267,20 +263,22 @@
   line-height: 1.55;
   color: #bfb3ba;
   margin: 0;
-  /* 5-line soft clamp so copy never pushes the tech row off the card. */
   display: -webkit-box;
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ---- Tech stack ------------------------------------------ */
+/* =========================
+   TECH
+========================= */
 .work-card-tech {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 4px;
 }
+
 .work-card-tech-label {
   font-family: "Roboto", "Geist", sans-serif;
   font-size: 10px;
@@ -289,11 +287,13 @@
   text-transform: uppercase;
   color: rgba(255, 160, 102, 0.85);
 }
+
 .work-card-tech-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
+
 .work-card-tech-pill {
   font-family: "Roboto", "Geist", sans-serif;
   font-size: 10.5px;
@@ -305,16 +305,21 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: border-color 240ms ease, color 240ms ease,
+  transition:
+    border-color 240ms ease,
+    color 240ms ease,
     background-color 240ms ease;
 }
+
 .work-card-tech-pill:hover {
   color: #ffa066;
   border-color: rgba(255, 160, 102, 0.45);
   background: rgba(255, 160, 102, 0.07);
 }
 
-/* ---- Glossy top sheen ------------------------------------- */
+/* =========================
+   SHEEN
+========================= */
 .work-card-sheen {
   position: absolute;
   top: 0;
@@ -335,49 +340,63 @@
   opacity: 0.85;
 }
 
-/* ============================================================
-   Tablets
-   ============================================================ */
+/* =========================
+   TABLETS
+========================= */
 @media only screen and (max-width: 1024px) {
+  .work-section {
+    padding-top: 18px;
+  }
+
   .work-intro {
-    padding: 14px 20px 4px;
+    padding: 10px 20px 8px;
   }
+
   .work-sticky {
-    padding: 16px 0 22px;
+    padding-top: 16px;
   }
+
   .work-stage {
     width: 90vw;
-    height: min(480px, 64vh);
+    height: min(500px, 70vh);
     border-radius: 24px;
   }
+
   .work-card {
     padding: 18px;
     gap: 14px;
     border-radius: 22px;
   }
+
   .work-card-body {
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: 1.35fr 1fr;
     gap: 16px;
   }
+
   .work-card-num {
     font-size: 24px;
   }
+
   .work-card-pill {
     padding: 9px 14px;
     font-size: 10.5px;
     letter-spacing: 1.6px;
   }
+
   .work-card-pill-ghost {
     width: 34px;
     height: 34px;
   }
+
   .work-card-title {
     font-size: clamp(20px, 2.6vw, 26px);
   }
+
   .work-card-desc {
     font-size: 12.5px;
     -webkit-line-clamp: 4;
   }
+
   .work-card-tech-pill {
     font-size: 10px;
     letter-spacing: 1.1px;
@@ -385,79 +404,100 @@
   }
 }
 
-/* ============================================================
-   Phones — stack image on top, content below.
-   ============================================================ */
+/* =========================
+   PHONES
+========================= */
 @media only screen and (max-width: 640px) {
+  .work-section {
+    padding-top: 14px;
+  }
+
   .work-intro {
-    padding: 12px 20px 4px;
+    padding: 8px 16px 8px;
   }
+
   .work-sticky {
-    padding: 12px 0 18px;
+    height: auto;
+    min-height: auto;
+    padding-top: 12px;
+    display: block;
   }
+
   .work-stage {
     width: 92vw;
     height: min(560px, 82vh);
+    margin: 0 auto;
     border-radius: 20px;
   }
+
   .work-card {
     padding: 14px;
     gap: 12px;
     border-radius: 18px;
   }
+
   .work-card-top {
     padding: 2px 4px;
   }
+
   .work-card-num {
     font-size: 20px;
   }
+
   .work-card-pill {
     padding: 8px 12px;
     font-size: 10px;
     letter-spacing: 1.4px;
   }
+
   .work-card-pill-ghost {
     width: 32px;
     height: 32px;
   }
 
-  /* Stack: image (46%) on top, content (54%) below. */
   .work-card-body {
     grid-template-columns: 1fr;
     grid-template-rows: 46% 54%;
     gap: 12px;
   }
+
   .work-card-image {
     border-radius: 14px;
   }
+
   .work-card-content {
     padding: 2px 4px;
     gap: 10px;
   }
+
   .work-card-title {
     font-size: 20px;
   }
+
   .work-card-desc {
     font-size: 12.5px;
     -webkit-line-clamp: 3;
   }
+
   .work-card-tech-label {
     font-size: 9px;
     letter-spacing: 1.6px;
   }
+
   .work-card-tech-pill {
     font-size: 9.5px;
     padding: 4px 8px;
   }
+
   .work-card-sheen {
     border-top-left-radius: 18px;
     border-top-right-radius: 18px;
   }
 }
 
-/* ============================================================
-   Reduced motion — hold everything still.
-   ============================================================ */
+/* =========================
+   REDUCED MOTION
+========================= */
 @media (prefers-reduced-motion: reduce) {
   .work-card-image img,
   .work-card-pill,
@@ -465,6 +505,7 @@
   .work-card-tech-pill {
     transition: none;
   }
+
   .work-card:hover .work-card-image img {
     transform: scale(1.02);
   }

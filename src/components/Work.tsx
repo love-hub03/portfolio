@@ -5,22 +5,6 @@ import "./styles/Work.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * Sticky Stacked Project Cards.
- *
- * One premium showcase card per project, stacked in a pinned stage.
- * Each card is a simple split layout:
- *   - Top-left: project number (01)
- *   - Top-right: "Live Project" pill + round GitHub icon
- *   - Left (~62%): one large rounded project image
- *   - Right (~38%): title, description, "Technology used" + tech pills
- *
- * Scroll behaviour unchanged — each new card slides up from below and
- * lands on top of the previous one (which shrinks + dims for depth).
- * Total pinned scroll = (projects.length - 1) * 100vh. Reduced motion
- * skips the scrub and leaves card 0 static.
- */
-
 type Project = {
   id: string;
   title: string;
@@ -31,16 +15,13 @@ type Project = {
   technologies: string[];
 };
 
-// Placeholder project deck — swap `image`, copy, links, and tech
-// arrays with your real projects. /images/image.png is used as the
-// fallback so nothing is missing out of the box.
 const projects: Project[] = [
   {
     id: "01",
     title: "Aurora Commerce",
     description:
       "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management. Tuned for sub-150ms TTI on mobile and Lighthouse 95+ across the board.",
-    image: "/images/image.png",
+    image: "/images/project1.png", // change to your real image
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["Next.js", "TypeScript", "Stripe", "MongoDB", "Tailwind"],
@@ -50,7 +31,7 @@ const projects: Project[] = [
     title: "Nebula Dashboard",
     description:
       "Multi-tenant SaaS analytics panel with live charts, role-based auth, and an exportable reporting engine. Handles 30M+ events a week in production without breaking a sweat.",
-    image: "/images/image.png",
+    image: "/images/project2.png", // change to your real image
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["React", "Node.js", "PostgreSQL", "D3", "WebSockets"],
@@ -60,7 +41,7 @@ const projects: Project[] = [
     title: "Solace Portfolio",
     description:
       "An award-leaning motion portfolio featuring scroll-linked parallax, a custom cursor, and a particle hero. Built end-to-end with a focus on polished motion and editorial typography.",
-    image: "/images/image.png",
+    image: "/images/project3.png", // change to your real image
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["React", "GSAP", "Vite", "TypeScript"],
@@ -70,7 +51,7 @@ const projects: Project[] = [
     title: "Lumen Chat",
     description:
       "End-to-end encrypted group chat with presence, typing indicators, and offline-first sync. Distilled from a 12-week client engagement into a cross-platform React Native app.",
-    image: "/images/image.png",
+    image: "/images/project4.png", // change to your real image
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["React Native", "Firebase", "WebSockets", "SQLite"],
@@ -86,15 +67,14 @@ const Work = () => {
     const sticky = stickyRef.current;
     if (!section || !sticky) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
-      .matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
       if (cards.length < 2) return;
 
-      // Card 0 visible at rest; others parked just below the stage.
+      // initial state
       cards.forEach((card, i) => {
         gsap.set(card, {
           yPercent: i === 0 ? 0 : 100,
@@ -107,13 +87,7 @@ const Work = () => {
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          // Trigger on the sticky element itself so the pin begins
-          // the moment the card reaches the top of the viewport
-          // (after the intro naturally scrolls past). Using section
-          // as the trigger would start the pin when the section top
-          // hits top:top, leaving the card pinned at an offset equal
-          // to the intro height — which reads as dead space.
-          trigger: sticky,
+          trigger: section, // IMPORTANT FIX
           start: "top top",
           end: () => `+=${slots * window.innerHeight}`,
           pin: sticky,
@@ -125,18 +99,22 @@ const Work = () => {
 
       for (let i = 1; i < cards.length; i++) {
         const position = i - 1;
+
         tl.fromTo(
           cards[i],
           { yPercent: 100 },
           { yPercent: 0, ease: "none", duration: 1 },
           position
         );
+
         tl.to(
           cards[i - 1],
           { scale: 0.94, opacity: 0.55, ease: "none", duration: 1 },
           position
         );
       }
+
+      ScrollTrigger.refresh();
     }, section);
 
     return () => ctx.revert();
@@ -157,12 +135,12 @@ const Work = () => {
             <article
               className="work-card"
               key={p.id}
-              style={{ zIndex: i + 1 }}
+              style={{ zIndex: projects.length - i }}
               data-cursor="disable"
             >
-              {/* Top bar: number left, action pills right */}
               <header className="work-card-top">
                 <span className="work-card-num">{p.id}</span>
+
                 <div className="work-card-actions">
                   {p.liveUrl && (
                     <a
@@ -175,6 +153,7 @@ const Work = () => {
                       <span aria-hidden="true">↗</span>
                     </a>
                   )}
+
                   {p.githubUrl && (
                     <a
                       className="work-card-pill work-card-pill-ghost"
@@ -194,7 +173,6 @@ const Work = () => {
                 </div>
               </header>
 
-              {/* Split body: image left, content right */}
               <div className="work-card-body">
                 <div className="work-card-image">
                   <img src={p.image} alt={p.title} loading="lazy" />
@@ -205,11 +183,12 @@ const Work = () => {
                   <p className="work-card-desc">{p.description}</p>
 
                   <div className="work-card-tech">
-                    <span className="work-card-tech-label">Technology used</span>
+                    <span className="work-card-tech-label">Technology Used</span>
+
                     <div className="work-card-tech-pills">
-                      {p.technologies.map((t) => (
-                        <span className="work-card-tech-pill" key={t}>
-                          {t}
+                      {p.technologies.map((tech) => (
+                        <span className="work-card-tech-pill" key={tech}>
+                          {tech}
                         </span>
                       ))}
                     </div>
