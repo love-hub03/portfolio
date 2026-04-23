@@ -6,75 +6,69 @@ import "./styles/Work.css";
 gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Sticky Stacked Cards reveal.
+ * Sticky Stacked Project Cards.
  *
- * Implementation:
- *  - The outer <section> gets pinned while the user scrolls through it.
- *  - Inside the pinned area (.work-sticky) all project cards are
- *    absolutely centred at the same spot. Card 0 is visible at rest;
- *    cards 1..N-1 start translated down by 100% of their own height so
- *    they sit just below the viewport.
- *  - A GSAP timeline, scrubbed 1:1 with scroll, slides each subsequent
- *    card up to y:0 while simultaneously shrinking + dimming the card
- *    directly beneath it. That small scale/opacity change sells the
- *    "layered" depth — cards feel like they're stacking on top of each
- *    other, not replacing each other.
- *  - Each reveal consumes exactly one viewport height of scroll, so
- *    the pinned duration = (projects.length - 1) * 100vh.
- *  - `prefers-reduced-motion` skips the scrubbing setup and leaves the
- *    cards stacked statically (card 0 visible on top).
+ * Reference-accurate design:
+ *  - Compact card (~980×420, not hero-sized).
+ *  - Top row: "01" + category on the left, "LIVE PROJECT" pill on the right.
+ *  - Body: mosaic image layout — one large image left, two smaller
+ *    images stacked on the right.
+ *  - Stack scroll: all cards share the same sticky stage; each new
+ *    card rises from below and lands on top of the previous one, with
+ *    the card beneath shrinking slightly + dimming for depth.
+ *
+ * Each reveal consumes one viewport height of scroll, so the pinned
+ * duration = (projects.length - 1) * 100vh. `prefers-reduced-motion`
+ * skips the whole scrub and shows card 0 statically.
  */
 
 type Project = {
   title: string;
   category: string;
-  description: string;
-  image: string;
-  tags: string[];
+  description?: string;
+  /** [mainImageLarge, topSmall, bottomSmall] */
+  images: [string, string, string];
   demo?: string;
   github?: string;
 };
 
-// Placeholder project deck — swap image / links / copy with real
-// projects. Uses /images/image.png so nothing is missing out of the box.
+// Placeholder project deck — swap `images`, `title`, copy, and links
+// with real projects. Using /images/image.png so nothing is missing
+// out of the box.
 const projects: Project[] = [
   {
     title: "Aurora Commerce",
-    category: "Full-Stack E-Commerce",
+    category: "Blynx Studio",
     description:
-      "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management. Built for sub-150ms TTI on mobile.",
-    image: "/images/image.png",
-    tags: ["Next.js", "TypeScript", "Stripe", "MongoDB"],
+      "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management.",
+    images: ["/images/image.png", "/images/image.png", "/images/image.png"],
     demo: "#",
     github: "#",
   },
   {
     title: "Nebula Dashboard",
-    category: "SaaS Analytics",
+    category: "Lumen Analytics",
     description:
-      "Multi-tenant analytics panel with live charts, role-based auth, and an exportable reporting engine. Handles 30M+ events a week in production.",
-    image: "/images/image.png",
-    tags: ["React", "GSAP", "Node", "PostgreSQL"],
+      "Multi-tenant SaaS analytics with live charts, role-based auth, and an exportable reporting engine.",
+    images: ["/images/image.png", "/images/image.png", "/images/image.png"],
     demo: "#",
     github: "#",
   },
   {
     title: "Solace Portfolio",
-    category: "Creative Developer Site",
+    category: "Studio Solace",
     description:
-      "An award-leaning motion portfolio featuring scroll-linked parallax, a custom cursor, and a WebGL hero — tuned for Lighthouse 95+ across the board.",
-    image: "/images/image.png",
-    tags: ["React", "Three.js", "GSAP", "Vite"],
+      "An award-leaning motion portfolio featuring scroll-linked parallax, custom cursor, and a WebGL hero.",
+    images: ["/images/image.png", "/images/image.png", "/images/image.png"],
     demo: "#",
     github: "#",
   },
   {
     title: "Lumen Chat",
-    category: "Realtime Messaging",
+    category: "Lumen Labs",
     description:
-      "End-to-end encrypted group chat with presence, typing indicators, and offline-first sync. Distilled from a 12-week client engagement.",
-    image: "/images/image.png",
-    tags: ["React Native", "WebSockets", "Firebase"],
+      "End-to-end encrypted group chat with presence, typing indicators, and offline-first sync.",
+    images: ["/images/image.png", "/images/image.png", "/images/image.png"],
     demo: "#",
     github: "#",
   },
@@ -97,9 +91,7 @@ const Work = () => {
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
       if (cards.length < 2) return;
 
-      // Initial stack — first card on top of the pile, others parked
-      // just below the viewport. yPercent translates by the card's own
-      // height, which is exactly the runway we want for the slide-up.
+      // Card 0 visible at rest; others parked just below the stage.
       cards.forEach((card, i) => {
         gsap.set(card, {
           yPercent: i === 0 ? 0 : 100,
@@ -108,7 +100,6 @@ const Work = () => {
         });
       });
 
-      // One "slot" of scroll distance per card transition.
       const slots = cards.length - 1;
 
       const tl = gsap.timeline({
@@ -124,20 +115,19 @@ const Work = () => {
       });
 
       for (let i = 1; i < cards.length; i++) {
-        const position = i - 1; // timeline slot this transition occupies
+        const position = i - 1;
 
-        // Incoming card slides up from below — the headline motion.
+        // Incoming card slides up from below.
         tl.fromTo(
           cards[i],
           { yPercent: 100 },
           { yPercent: 0, ease: "none", duration: 1 },
           position
         );
-
-        // Card beneath gently shrinks + dims to suggest depth.
+        // Card beneath shrinks + dims for depth.
         tl.to(
           cards[i - 1],
-          { scale: 0.94, opacity: 0.6, ease: "none", duration: 1 },
+          { scale: 0.94, opacity: 0.55, ease: "none", duration: 1 },
           position
         );
       }
@@ -148,77 +138,92 @@ const Work = () => {
 
   return (
     <section className="work-section" id="work" ref={sectionRef}>
-      <div className="work-intro section-container">
-        <span className="work-eyebrow">selected projects</span>
+      <div className="work-intro">
+        <span className="work-eyebrow">selected work</span>
         <h2 className="work-heading">
-          My <span>Work</span>
+          My <span>Projects</span>
         </h2>
-        <p className="work-sub">
-          A small curated set — scroll to flip through the stack.
-        </p>
       </div>
 
       <div className="work-sticky" ref={stickyRef}>
         <div className="work-stage">
-          {projects.map((p, i) => (
-            <article
-              className="work-card"
-              key={p.title}
-              style={{ zIndex: i + 1 }}
-              data-cursor="disable"
-            >
-              <div className="work-card-media">
-                <img src={p.image} alt={p.title} loading="lazy" />
-                <div className="work-card-media-shade" aria-hidden="true" />
-              </div>
+          {projects.map((p, i) => {
+            const num = String(i + 1).padStart(2, "0");
+            return (
+              <article
+                className="work-card"
+                key={p.title}
+                style={{ zIndex: i + 1 }}
+                data-cursor="disable"
+              >
+                {/* Top row: number + meta on the left, LIVE PROJECT
+                    pill on the right. */}
+                <header className="work-card-top">
+                  <div className="work-card-top-left">
+                    <span className="work-card-num">{num}</span>
+                    <div className="work-card-meta">
+                      <span className="work-card-meta-kicker">CLIENT</span>
+                      <span className="work-card-meta-name">{p.category}</span>
+                    </div>
+                  </div>
 
-              <div className="work-card-body">
-                <div className="work-card-meta">
-                  <span className="work-card-index">
-                    0{i + 1} / 0{projects.length}
-                  </span>
-                  <span className="work-card-category">{p.category}</span>
+                  <div className="work-card-top-right">
+                    {p.demo && (
+                      <a
+                        className="work-card-pill work-card-pill-primary"
+                        href={p.demo}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Live Project
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    )}
+                    {p.github && (
+                      <a
+                        className="work-card-pill work-card-pill-ghost"
+                        href={p.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`${p.title} GitHub repository`}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="15"
+                          height="15"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.57.1.78-.25.78-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.3-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.49.12-3.1 0 0 .97-.32 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.5 3.18-1.18 3.18-1.18.64 1.61.24 2.8.12 3.1.75.81 1.2 1.84 1.2 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.07.78 2.17v3.22c0 .31.2.67.79.55A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"
+                          />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </header>
+
+                {/* Mosaic: 1 large image on the left, 2 smaller images
+                    stacked on the right. */}
+                <div className="work-card-mosaic">
+                  <div className="work-card-main-media">
+                    <img src={p.images[0]} alt={`${p.title} preview 1`} loading="lazy" />
+                  </div>
+                  <div className="work-card-side">
+                    <div className="work-card-side-media">
+                      <img src={p.images[1]} alt={`${p.title} preview 2`} loading="lazy" />
+                    </div>
+                    <div className="work-card-side-media">
+                      <img src={p.images[2]} alt={`${p.title} preview 3`} loading="lazy" />
+                    </div>
+                  </div>
                 </div>
 
-                <h3 className="work-card-title">{p.title}</h3>
-                <p className="work-card-desc">{p.description}</p>
-
-                <div className="work-card-tags">
-                  {p.tags.map((t) => (
-                    <span className="work-card-tag" key={t}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="work-card-actions">
-                  {p.demo && (
-                    <a
-                      className="work-card-btn work-card-btn-primary"
-                      href={p.demo}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Live Demo
-                      <span aria-hidden="true">→</span>
-                    </a>
-                  )}
-                  {p.github && (
-                    <a
-                      className="work-card-btn work-card-btn-ghost"
-                      href={p.github}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      GitHub
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              <div className="work-card-sheen" aria-hidden="true" />
-            </article>
-          ))}
+                {/* Glossy top sheen for the premium display-glass feel. */}
+                <div className="work-card-sheen" aria-hidden="true" />
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

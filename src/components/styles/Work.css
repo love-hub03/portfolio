@@ -1,33 +1,37 @@
 /* ============================================================
    Work.css
-   Sticky Stacked Cards scroll interaction.
+   Sticky Stacked Project Cards — compact, reference-accurate.
 
-   Layout overview:
-     section.work-section
-       .work-intro                — eyebrow + heading + sub
-       .work-sticky               — pinned by ScrollTrigger
-         .work-stage              — centres cards; overflow:hidden
-           article.work-card × N  — absolutely stacked; animated by GSAP
+   Card anatomy:
+     article.work-card
+       header.work-card-top
+         .work-card-top-left   → "01" + CLIENT meta
+         .work-card-top-right  → LIVE PROJECT pill (+ GitHub icon)
+       .work-card-mosaic
+         .work-card-main-media         → large left image
+         .work-card-side               → column of two smaller images
+           .work-card-side-media × 2
+       .work-card-sheen        → glossy top overlay
 
-   Visual language:
-     - Large rounded project cards (28px radius) on dark glass.
-     - Two-column interior: media left, body right.
-     - Warm orange accents (buttons, tag outlines, hover).
-     - Glossy top sheen for the premium display-glass feel.
+   Stack scroll:
+     - section.work-section contains the intro + the pinned stage.
+     - .work-sticky is pinned by GSAP for (N-1)*100vh of scroll.
+     - All cards absolute-inset inside .work-stage; GSAP slides the
+       next one up from yPercent:100 to 0 while the one beneath
+       scales down a hair and dims.
    ============================================================ */
 
 .work-section {
   position: relative;
   width: 100%;
-  /* Section height itself stays natural; ScrollTrigger's pinSpacing
-     injects the scroll runway, so we don't need to hard-code a tall
-     outer wrapper. */
 }
 
 /* ---- Intro block ------------------------------------------- */
 .work-intro {
   text-align: center;
-  padding: 140px 0 60px;
+  /* Reduced top spacing — stack appears much earlier in the viewport
+     instead of after a big empty gap. */
+  padding: 72px 24px 28px;
 }
 .work-eyebrow {
   display: inline-block;
@@ -37,7 +41,7 @@
   letter-spacing: 4px;
   text-transform: uppercase;
   color: rgba(255, 160, 102, 0.85);
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   padding: 6px 14px;
   border: 1px solid rgba(255, 160, 102, 0.25);
   border-radius: 999px;
@@ -45,10 +49,10 @@
 }
 .work-heading {
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: clamp(40px, 6vw, 72px);
+  font-size: clamp(36px, 5.4vw, 64px);
   font-weight: 600;
   letter-spacing: -0.5px;
-  margin: 0 0 12px;
+  margin: 0;
   line-height: 1.05;
   color: #f2ece9;
 }
@@ -59,21 +63,15 @@
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
-.work-sub {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 14px;
-  color: #a79ca6;
-  margin: 0;
-  letter-spacing: 0.4px;
-}
 
 /* ============================================================
-   Pinned sticky area — this is what GSAP pins during the stack
-   reveal. Full viewport so cards have a large canvas to live in.
+   Pinned sticky stage — the card theatre.
    ============================================================ */
 .work-sticky {
   position: relative;
   width: 100%;
+  /* Full viewport — cards sit inside a compact rectangle, so most of
+     the sticky area is padding/air around the card rather than card. */
   height: 100vh;
   display: flex;
   align-items: center;
@@ -82,243 +80,229 @@
 
 .work-stage {
   position: relative;
-  width: min(1180px, 92vw);
-  /* Stage height caps the cards; overflow:hidden clips the card while
-     it's parked below so it never causes a scrollbar. */
-  height: min(680px, 78vh);
+  /* Compact — this is the rectangle every card fills via `inset: 0`. */
+  width: min(980px, 78vw);
+  height: min(420px, 52vh);
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 26px;
 }
 
 /* ============================================================
    The card.
 
-   Each card is absolutely positioned to fill the stage exactly so
-   they all share the same rectangle. GSAP animates yPercent + scale
-   + opacity; we keep centring off the transform property so GSAP
-   owns transform entirely.
+   Stacked via position:absolute + inset:0, so each card fills the
+   stage exactly. GSAP owns `transform` (yPercent + scale); we set
+   transform-origin so the sinking card settles downward rather than
+   drifting off into space.
    ============================================================ */
 .work-card {
   position: absolute;
   inset: 0;
 
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  gap: 14px;
 
-  border-radius: 28px;
+  border-radius: 24px;
   overflow: hidden;
   isolation: isolate;
 
   background:
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.02) 45%,
-      rgba(0, 0, 0, 0.35) 100%
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.015) 45%,
+      rgba(0, 0, 0, 0.38) 100%
     ),
-    rgba(22, 17, 22, 0.78);
+    rgba(18, 14, 18, 0.82);
 
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(16px) saturate(125%);
   -webkit-backdrop-filter: blur(16px) saturate(125%);
 
   box-shadow:
-    0 40px 80px -30px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 34px 70px -28px rgba(0, 0, 0, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  /* GSAP owns transform; we set the origin so scale feels anchored
-     to the top edge (card sinking down, not drifting away). */
   transform-origin: 50% 20%;
   will-change: transform, opacity;
 }
 
-/* ---- Media column ------------------------------------------ */
-.work-card-media {
+/* ============================================================
+   Top row
+   ============================================================ */
+.work-card-top {
   position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #0e0a0f;
-}
-.work-card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  /* Subtle zoom on hover so the card reads as interactive. */
-  transform: scale(1.02);
-  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.work-card:hover .work-card-media img {
-  transform: scale(1.06);
-}
-
-/* Gentle gradient shade so copy stays readable near the seam. */
-.work-card-media-shade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0) 60%,
-    rgba(11, 8, 12, 0.55) 100%
-  );
-}
-
-/* ---- Body column ------------------------------------------- */
-.work-card-body {
-  position: relative;
-  z-index: 1;
+  z-index: 3;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-  padding: 56px 60px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 10px 0;
 }
 
-.work-card-meta {
+.work-card-top-left {
   display: flex;
   align-items: center;
   gap: 14px;
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: #bfb3ba;
+  min-width: 0;
 }
-.work-card-index {
-  color: rgba(255, 160, 102, 0.9);
-  font-weight: 600;
-}
-.work-card-category {
-  position: relative;
-  padding-left: 14px;
-}
-.work-card-category::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 6px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.work-card-title {
+.work-card-num {
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: clamp(28px, 3.4vw, 44px);
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  line-height: 1.08;
-  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1;
   color: #f6efe9;
 }
-
-.work-card-desc {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #bfb3ba;
-  margin: 0;
-  max-width: 46ch;
-}
-
-/* ---- Tech tags --------------------------------------------- */
-.work-card-tags {
+.work-card-meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.work-card-tag {
+.work-card-meta-kicker {
   font-family: "Roboto", "Geist", sans-serif;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 1.5px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: #d7d0db;
-  padding: 6px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  transition: border-color 280ms ease, color 280ms ease;
+  color: rgba(255, 160, 102, 0.85);
 }
-.work-card-tag:hover {
-  border-color: rgba(255, 160, 102, 0.5);
-  color: #ffa066;
+.work-card-meta-name {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d7d0db;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ---- Action buttons ---------------------------------------- */
-.work-card-actions {
+.work-card-top-right {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 10px;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
-.work-card-btn {
+
+/* ---- Pill buttons ----------------------------------------- */
+.work-card-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 22px;
+  padding: 9px 16px;
   border-radius: 999px;
 
   font-family: "Poppins", "Geist", sans-serif;
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
   text-decoration: none;
+  white-space: nowrap;
 
-  transition: transform 260ms ease, background-color 260ms ease,
-    border-color 260ms ease, color 260ms ease, box-shadow 260ms ease;
+  transition:
+    transform 240ms ease,
+    background-color 240ms ease,
+    border-color 240ms ease,
+    color 240ms ease,
+    box-shadow 240ms ease;
 }
-.work-card-btn-primary {
-  background: linear-gradient(135deg, #ffa066 0%, #ff7a3c 100%);
+.work-card-pill-primary {
+  color: #f6efe9;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.work-card-pill-primary:hover {
   color: #1a0f07;
-  box-shadow: 0 10px 28px -10px rgba(255, 140, 70, 0.55);
+  background: linear-gradient(135deg, #ffa066 0%, #ff7a3c 100%);
+  border-color: transparent;
+  box-shadow: 0 10px 26px -10px rgba(255, 140, 70, 0.55);
 }
-.work-card-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px -12px rgba(255, 140, 70, 0.7);
+.work-card-pill-primary span {
+  transition: transform 240ms ease;
 }
-.work-card-btn-primary span {
-  transition: transform 260ms ease;
+.work-card-pill-primary:hover span {
+  transform: translate(2px, -2px);
 }
-.work-card-btn-primary:hover span {
-  transform: translateX(4px);
-}
-.work-card-btn-ghost {
+.work-card-pill-ghost {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
   color: #d7d0db;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
-.work-card-btn-ghost:hover {
+.work-card-pill-ghost:hover {
   color: #ffa066;
   border-color: rgba(255, 160, 102, 0.5);
   background: rgba(255, 160, 102, 0.06);
 }
 
-/* ---- Glossy top sheen -------------------------------------- */
+/* ============================================================
+   Mosaic — large left + two stacked right.
+   ============================================================ */
+.work-card-mosaic {
+  position: relative;
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+.work-card-main-media,
+.work-card-side-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #0e0a0f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.work-card-main-media img,
+.work-card-side-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.work-card:hover .work-card-main-media img,
+.work-card:hover .work-card-side-media img {
+  transform: scale(1.06);
+}
+
+.work-card-side {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* ---- Sheen (top glossy highlight) -------------------------- */
 .work-card-sheen {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 38%;
+  height: 30%;
   pointer-events: none;
   z-index: 2;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.03) 55%,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 60%,
     transparent 100%
   );
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
   mix-blend-mode: screen;
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
 /* ============================================================
@@ -326,107 +310,122 @@
    ============================================================ */
 @media only screen and (max-width: 1024px) {
   .work-intro {
-    padding: 110px 0 48px;
+    padding: 60px 20px 22px;
   }
   .work-stage {
-    width: 94vw;
-    height: 72vh;
-    border-radius: 24px;
+    width: 90vw;
+    height: min(440px, 58vh);
+    border-radius: 22px;
   }
   .work-card {
-    grid-template-columns: 1fr 1fr;
-    border-radius: 24px;
+    padding: 14px;
+    gap: 12px;
+    border-radius: 20px;
   }
-  .work-card-body {
-    padding: 40px 44px;
-    gap: 14px;
+  .work-card-mosaic {
+    gap: 10px;
   }
-  .work-card-title {
-    font-size: clamp(24px, 3.2vw, 36px);
+  .work-card-main-media,
+  .work-card-side-media {
+    border-radius: 14px;
   }
-  .work-card-desc {
-    font-size: 14px;
+  .work-card-num {
+    font-size: 24px;
+  }
+  .work-card-meta-name {
+    font-size: 12.5px;
+  }
+  .work-card-pill {
+    padding: 8px 13px;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+  }
+  .work-card-pill-ghost {
+    width: 32px;
+    height: 32px;
   }
 }
 
 /* ============================================================
-   Phones — flip to a vertical card (image on top, body below),
-   tighten everything, shorten stage so one card still fits on
-   small screens.
+   Phones — simplify mosaic to 1 large image on top + 1 smaller
+   image row. Keeps the premium feel without forcing the desktop
+   grid onto a narrow screen.
    ============================================================ */
 @media only screen and (max-width: 640px) {
   .work-intro {
-    padding: 80px 0 36px;
-  }
-  .work-sub {
-    font-size: 12.5px;
-    padding: 0 20px;
+    padding: 48px 20px 18px;
   }
   .work-sticky {
     height: 100vh;
   }
   .work-stage {
     width: 92vw;
-    height: 82vh;
+    height: min(520px, 78vh);
     border-radius: 20px;
   }
   .work-card {
-    grid-template-columns: 1fr;
-    grid-template-rows: 44% 56%;
-    border-radius: 20px;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 18px;
   }
-  .work-card-media-shade {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0) 55%,
-      rgba(11, 8, 12, 0.55) 100%
-    );
-  }
-  .work-card-body {
-    padding: 22px 22px 24px;
+  .work-card-top {
+    padding: 4px 6px 0;
     gap: 10px;
   }
-  .work-card-title {
-    font-size: 22px;
+  .work-card-num {
+    font-size: 20px;
   }
-  .work-card-desc {
-    font-size: 13px;
-    line-height: 1.55;
-    /* Clamp so very long copy doesn't push the buttons off-card. */
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  .work-card-meta-kicker {
+    font-size: 9px;
+    letter-spacing: 1.6px;
   }
-  .work-card-tag {
+  .work-card-meta-name {
+    font-size: 11.5px;
+  }
+  .work-card-pill {
+    padding: 7px 11px;
     font-size: 9.5px;
-    padding: 5px 9px;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.4px;
   }
-  .work-card-btn {
-    padding: 10px 16px;
-    font-size: 11px;
-    letter-spacing: 1.5px;
+  .work-card-pill-ghost {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Mosaic → vertical: big on top, thin row of 2 below. */
+  .work-card-mosaic {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1.6fr 1fr;
+    gap: 8px;
+  }
+  .work-card-main-media,
+  .work-card-side-media {
+    border-radius: 12px;
+  }
+  .work-card-side {
+    grid-template-rows: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
   .work-card-sheen {
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
   }
 }
 
 /* ============================================================
-   Reduced motion — no scrubbed reveal; show card 0 by default.
-   GSAP also bails out in the component, so this mostly keeps
-   hover polish calm.
+   Reduced motion — GSAP bails out in the component; keep hover
+   polish minimal here too.
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .work-card-media img,
-  .work-card-btn,
-  .work-card-btn-primary span,
-  .work-card-tag {
+  .work-card-main-media img,
+  .work-card-side-media img,
+  .work-card-pill,
+  .work-card-pill-primary span {
     transition: none;
   }
-  .work-card:hover .work-card-media img {
+  .work-card:hover .work-card-main-media img,
+  .work-card:hover .work-card-side-media img {
     transform: scale(1.02);
   }
 }
