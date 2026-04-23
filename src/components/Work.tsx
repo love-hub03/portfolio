@@ -107,7 +107,13 @@ const Work = () => {
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: section,
+          // Trigger on the sticky element itself so the pin begins
+          // the moment the card reaches the top of the viewport
+          // (after the intro naturally scrolls past). Using section
+          // as the trigger would start the pin when the section top
+          // hits top:top, leaving the card pinned at an offset equal
+          // to the intro height — which reads as dead space.
+          trigger: sticky,
           start: "top top",
           end: () => `+=${slots * window.innerHeight}`,
           pin: sticky,
