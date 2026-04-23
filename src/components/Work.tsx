@@ -20,8 +20,8 @@ const projects: Project[] = [
     id: "01",
     title: "Aurora Commerce",
     description:
-      "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management. Tuned for sub-150ms TTI on mobile and Lighthouse 95+ across the board.",
-    image: "/images/project1.png", // change to your real image
+      "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management.",
+    image: "/images/project1.png",
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["Next.js", "TypeScript", "Stripe", "MongoDB", "Tailwind"],
@@ -30,28 +30,28 @@ const projects: Project[] = [
     id: "02",
     title: "Nebula Dashboard",
     description:
-      "Multi-tenant SaaS analytics panel with live charts, role-based auth, and an exportable reporting engine. Handles 30M+ events a week in production without breaking a sweat.",
-    image: "/images/project2.png", // change to your real image
+      "Multi-tenant SaaS analytics panel with live charts, role-based auth, and exportable reporting.",
+    image: "/images/project2.png",
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["React", "Node.js", "PostgreSQL", "D3", "WebSockets"],
   },
   {
     id: "03",
-    title: "Solace Portfolio",
+    title: "Weather Web App",
     description:
-      "An award-leaning motion portfolio featuring scroll-linked parallax, a custom cursor, and a particle hero. Built end-to-end with a focus on polished motion and editorial typography.",
-    image: "/images/project3.png", // change to your real image
+      "A clean responsive weather application using live weather APIs with modern UI and quick city search.",
+    image: "/images/project3.png",
     liveUrl: "#",
     githubUrl: "#",
-    technologies: ["React", "GSAP", "Vite", "TypeScript"],
+    technologies: ["HTML", "CSS", "JavaScript", "Weather API"],
   },
   {
     id: "04",
     title: "Lumen Chat",
     description:
-      "End-to-end encrypted group chat with presence, typing indicators, and offline-first sync. Distilled from a 12-week client engagement into a cross-platform React Native app.",
-    image: "/images/project4.png", // change to your real image
+      "Realtime encrypted chat with typing indicators, presence, and offline-first sync.",
+    image: "/images/project4.png",
     liveUrl: "#",
     githubUrl: "#",
     technologies: ["React Native", "Firebase", "WebSockets", "SQLite"],
@@ -60,12 +60,12 @@ const projects: Project[] = [
 
 const Work = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const stickyRef = useRef<HTMLDivElement | null>(null);
+  const pinWrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
-    const sticky = stickyRef.current;
-    if (!section || !sticky) return;
+    const pinWrap = pinWrapRef.current;
+    if (!section || !pinWrap) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
@@ -74,23 +74,22 @@ const Work = () => {
       const cards = gsap.utils.toArray<HTMLElement>(".work-card");
       if (cards.length < 2) return;
 
-      // initial state
+      // Initial states
       cards.forEach((card, i) => {
         gsap.set(card, {
           yPercent: i === 0 ? 0 : 100,
+          opacity: i === 0 ? 1 : 0,
           scale: 1,
-          opacity: 1,
+          zIndex: cards.length - i,
         });
       });
 
-      const slots = cards.length - 1;
-
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: section, // IMPORTANT FIX
+          trigger: section,
           start: "top top",
-          end: () => `+=${slots * window.innerHeight}`,
-          pin: sticky,
+          end: () => `+=${(cards.length - 1) * window.innerHeight}`,
+          pin: pinWrap, // pin heading + stage together
           pinSpacing: true,
           scrub: 1,
           invalidateOnRefresh: true,
@@ -98,19 +97,37 @@ const Work = () => {
       });
 
       for (let i = 1; i < cards.length; i++) {
-        const position = i - 1;
-
-        tl.fromTo(
-          cards[i],
-          { yPercent: 100 },
-          { yPercent: 0, ease: "none", duration: 1 },
-          position
-        );
+        const prev = cards[i - 1];
+        const curr = cards[i];
+        const pos = i - 1;
 
         tl.to(
-          cards[i - 1],
-          { scale: 0.94, opacity: 0.55, ease: "none", duration: 1 },
-          position
+          prev,
+          {
+            yPercent: -8,
+            opacity: 0,
+            scale: 0.97,
+            ease: "none",
+            duration: 1,
+          },
+          pos
+        );
+
+        tl.fromTo(
+          curr,
+          {
+            yPercent: 100,
+            opacity: 0,
+            scale: 1,
+          },
+          {
+            yPercent: 0,
+            opacity: 1,
+            scale: 1,
+            ease: "none",
+            duration: 1,
+          },
+          pos
         );
       }
 
@@ -122,22 +139,17 @@ const Work = () => {
 
   return (
     <section className="work-section" id="work" ref={sectionRef}>
-      <div className="work-intro">
-        <span className="work-eyebrow">selected work</span>
-        <h2 className="work-heading">
-          My <span>Projects</span>
-        </h2>
-      </div>
+      <div className="work-pin-wrap" ref={pinWrapRef}>
+        <div className="work-intro">
+          <span className="work-eyebrow">Selected Work</span>
+          <h2 className="work-heading">
+            My <span>Projects</span>
+          </h2>
+        </div>
 
-      <div className="work-sticky" ref={stickyRef}>
         <div className="work-stage">
           {projects.map((p, i) => (
-            <article
-              className="work-card"
-              key={p.id}
-              style={{ zIndex: projects.length - i }}
-              data-cursor="disable"
-            >
+            <article className="work-card" key={p.id} style={{ zIndex: projects.length - i }}>
               <header className="work-card-top">
                 <span className="work-card-num">{p.id}</span>
 
@@ -149,8 +161,7 @@ const Work = () => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Live Project
-                      <span aria-hidden="true">↗</span>
+                      Live Project <span>↗</span>
                     </a>
                   )}
 
@@ -160,7 +171,7 @@ const Work = () => {
                       href={p.githubUrl}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={`${p.title} GitHub repository`}
+                      aria-label={`${p.title} GitHub`}
                     >
                       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
                         <path
@@ -184,7 +195,6 @@ const Work = () => {
 
                   <div className="work-card-tech">
                     <span className="work-card-tech-label">Technology Used</span>
-
                     <div className="work-card-tech-pills">
                       {p.technologies.map((tech) => (
                         <span className="work-card-tech-pill" key={tech}>
@@ -196,7 +206,7 @@ const Work = () => {
                 </div>
               </div>
 
-              <div className="work-card-sheen" aria-hidden="true" />
+              <div className="work-card-sheen" />
             </article>
           ))}
         </div>

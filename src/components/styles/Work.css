@@ -4,7 +4,22 @@
 .work-section {
   position: relative;
   width: 100%;
-  padding-top: 24px;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* Pin wrapper = heading + project stage both stay visible */
+.work-pin-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 110px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* =========================
@@ -12,14 +27,14 @@
 ========================= */
 .work-intro {
   text-align: center;
-  padding: 12px 24px 8px;
+  margin-bottom: 24px;
   position: relative;
-  z-index: 5;
+  z-index: 10;
 }
 
 .work-eyebrow {
   display: inline-block;
-  font-family: "Roboto", "Geist", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 4px;
@@ -33,44 +48,29 @@
 }
 
 .work-heading {
-  font-family: "Poppins", "Geist", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: clamp(34px, 5vw, 64px);
-  font-weight: 600;
-  letter-spacing: -0.5px;
+  font-weight: 700;
   margin: 0;
-  line-height: 1.05;
-  color: #f2ece9;
+  line-height: 1;
+  color: #f5efea;
 }
 
-.work-heading > span {
+.work-heading span {
   background: linear-gradient(90deg, #ffa066 0%, #ffc496 100%);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;
 }
 
 /* =========================
-   STICKY SHOWCASE AREA
+   STAGE
 ========================= */
-.work-sticky {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: flex-start; /* IMPORTANT FIX */
-  justify-content: center;
-  padding-top: 18px; /* IMPORTANT FIX */
-  box-sizing: border-box;
-  overflow: visible;
-}
-
 .work-stage {
   position: relative;
-  width: min(1120px, 84vw);
-  height: min(520px, 68vh); /* IMPORTANT FIX */
+  width: min(1180px, 86vw);
+  height: min(540px, 64vh);
+  border-radius: 30px;
   overflow: hidden;
-  border-radius: 28px;
 }
 
 /* =========================
@@ -83,7 +83,7 @@
   flex-direction: column;
   padding: 22px;
   gap: 18px;
-  border-radius: 26px;
+  border-radius: 28px;
   overflow: hidden;
   isolation: isolate;
 
@@ -104,29 +104,25 @@
     0 34px 70px -28px rgba(0, 0, 0, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  transform-origin: 50% 20%;
   will-change: transform, opacity;
 }
 
 /* =========================
-   TOP BAR
+   TOP
 ========================= */
 .work-card-top {
-  position: relative;
-  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 2px 6px;
+  position: relative;
+  z-index: 3;
 }
 
 .work-card-num {
-  font-family: "Poppins", "Geist", sans-serif;
-  font-size: 28px;
+  font-family: "Poppins", sans-serif;
+  font-size: 34px;
   font-weight: 700;
-  letter-spacing: -0.5px;
-  line-height: 1;
   color: #f6efe9;
 }
 
@@ -145,40 +141,19 @@
   gap: 8px;
   padding: 10px 18px;
   border-radius: 999px;
-  font-family: "Poppins", "Geist", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
-  transition:
-    transform 240ms ease,
-    background-color 240ms ease,
-    border-color 240ms ease,
-    color 240ms ease,
-    box-shadow 240ms ease;
 }
 
 .work-card-pill-primary {
   color: #f6efe9;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.work-card-pill-primary:hover {
-  color: #1a0f07;
-  background: linear-gradient(135deg, #ffa066 0%, #ff7a3c 100%);
-  border-color: transparent;
-  box-shadow: 0 10px 26px -10px rgba(255, 140, 70, 0.55);
-}
-
-.work-card-pill-primary span {
-  transition: transform 240ms ease;
-}
-
-.work-card-pill-primary:hover span {
-  transform: translate(2px, -2px);
 }
 
 .work-card-pill-ghost {
@@ -191,21 +166,14 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.work-card-pill-ghost:hover {
-  color: #ffa066;
-  border-color: rgba(255, 160, 102, 0.5);
-  background: rgba(255, 160, 102, 0.06);
-}
-
 /* =========================
-   BODY LAYOUT
+   BODY
 ========================= */
 .work-card-body {
-  position: relative;
-  flex: 1 1 auto;
+  flex: 1;
   display: grid;
-  grid-template-columns: 1.62fr 1fr;
-  gap: 22px;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
   min-height: 0;
 }
 
@@ -213,25 +181,17 @@
    IMAGE
 ========================= */
 .work-card-image {
-  position: relative;
   overflow: hidden;
-  border-radius: 18px;
-  background: #0e0a0f;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  min-height: 0;
+  border-radius: 20px;
+  background: #0f0b11;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .work-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* IMPORTANT */
+  object-fit: cover;
   display: block;
-  transform: scale(1.02);
-  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.work-card:hover .work-card-image img {
-  transform: scale(1.05);
 }
 
 /* =========================
@@ -242,31 +202,23 @@
   flex-direction: column;
   justify-content: center;
   gap: 14px;
-  min-width: 0;
-  min-height: 0;
-  padding: 4px 8px 4px 4px;
 }
 
 .work-card-title {
-  font-family: "Poppins", "Geist", sans-serif;
-  font-size: clamp(22px, 2.4vw, 32px);
-  font-weight: 600;
-  letter-spacing: -0.3px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(24px, 2.6vw, 40px);
+  font-weight: 700;
   line-height: 1.1;
   margin: 0;
   color: #f6efe9;
 }
 
 .work-card-desc {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #bfb3ba;
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #cbbfc6;
   margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /* =========================
@@ -275,14 +227,14 @@
 .work-card-tech {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .work-card-tech-label {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 10px;
-  font-weight: 600;
+  font-family: "Roboto", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: rgba(255, 160, 102, 0.85);
@@ -291,30 +243,20 @@
 .work-card-tech-pills {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .work-card-tech-pill {
-  font-family: "Roboto", "Geist", sans-serif;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 1.3px;
+  font-family: "Roboto", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #d7d0db;
-  padding: 5px 10px;
+  color: #ddd4dc;
+  padding: 6px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  transition:
-    border-color 240ms ease,
-    color 240ms ease,
-    background-color 240ms ease;
-}
-
-.work-card-tech-pill:hover {
-  color: #ffa066;
-  border-color: rgba(255, 160, 102, 0.45);
-  background: rgba(255, 160, 102, 0.07);
 }
 
 /* =========================
@@ -322,191 +264,42 @@
 ========================= */
 .work-card-sheen {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0 0 auto 0;
   height: 28%;
   pointer-events: none;
-  z-index: 2;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.08) 0%,
     rgba(255, 255, 255, 0.02) 60%,
     transparent 100%
   );
-  border-top-left-radius: 26px;
-  border-top-right-radius: 26px;
-  mix-blend-mode: screen;
-  opacity: 0.85;
+  z-index: 2;
 }
 
 /* =========================
-   TABLETS
+   MOBILE
 ========================= */
-@media only screen and (max-width: 1024px) {
-  .work-section {
-    padding-top: 18px;
-  }
-
-  .work-intro {
-    padding: 10px 20px 8px;
-  }
-
-  .work-sticky {
-    padding-top: 16px;
-  }
-
-  .work-stage {
-    width: 90vw;
-    height: min(500px, 70vh);
-    border-radius: 24px;
-  }
-
-  .work-card {
-    padding: 18px;
-    gap: 14px;
-    border-radius: 22px;
-  }
-
-  .work-card-body {
-    grid-template-columns: 1.35fr 1fr;
-    gap: 16px;
-  }
-
-  .work-card-num {
-    font-size: 24px;
-  }
-
-  .work-card-pill {
-    padding: 9px 14px;
-    font-size: 10.5px;
-    letter-spacing: 1.6px;
-  }
-
-  .work-card-pill-ghost {
-    width: 34px;
-    height: 34px;
-  }
-
-  .work-card-title {
-    font-size: clamp(20px, 2.6vw, 26px);
-  }
-
-  .work-card-desc {
-    font-size: 12.5px;
-    -webkit-line-clamp: 4;
-  }
-
-  .work-card-tech-pill {
-    font-size: 10px;
-    letter-spacing: 1.1px;
-    padding: 4px 9px;
-  }
-}
-
-/* =========================
-   PHONES
-========================= */
-@media only screen and (max-width: 640px) {
-  .work-section {
-    padding-top: 14px;
-  }
-
-  .work-intro {
-    padding: 8px 16px 8px;
-  }
-
-  .work-sticky {
-    height: auto;
-    min-height: auto;
-    padding-top: 12px;
-    display: block;
+@media (max-width: 900px) {
+  .work-pin-wrap {
+    padding-top: 90px;
   }
 
   .work-stage {
     width: 92vw;
-    height: min(560px, 82vh);
-    margin: 0 auto;
-    border-radius: 20px;
-  }
-
-  .work-card {
-    padding: 14px;
-    gap: 12px;
-    border-radius: 18px;
-  }
-
-  .work-card-top {
-    padding: 2px 4px;
-  }
-
-  .work-card-num {
-    font-size: 20px;
-  }
-
-  .work-card-pill {
-    padding: 8px 12px;
-    font-size: 10px;
-    letter-spacing: 1.4px;
-  }
-
-  .work-card-pill-ghost {
-    width: 32px;
-    height: 32px;
+    height: min(620px, 72vh);
   }
 
   .work-card-body {
     grid-template-columns: 1fr;
-    grid-template-rows: 46% 54%;
-    gap: 12px;
-  }
-
-  .work-card-image {
-    border-radius: 14px;
-  }
-
-  .work-card-content {
-    padding: 2px 4px;
-    gap: 10px;
+    grid-template-rows: 48% 52%;
+    gap: 14px;
   }
 
   .work-card-title {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .work-card-desc {
-    font-size: 12.5px;
-    -webkit-line-clamp: 3;
-  }
-
-  .work-card-tech-label {
-    font-size: 9px;
-    letter-spacing: 1.6px;
-  }
-
-  .work-card-tech-pill {
-    font-size: 9.5px;
-    padding: 4px 8px;
-  }
-
-  .work-card-sheen {
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-  }
-}
-
-/* =========================
-   REDUCED MOTION
-========================= */
-@media (prefers-reduced-motion: reduce) {
-  .work-card-image img,
-  .work-card-pill,
-  .work-card-pill-primary span,
-  .work-card-tech-pill {
-    transition: none;
-  }
-
-  .work-card:hover .work-card-image img {
-    transform: scale(1.02);
+    font-size: 13px;
   }
 }
