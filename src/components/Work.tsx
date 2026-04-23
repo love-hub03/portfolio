@@ -210,11 +210,25 @@ const Work = () => {
                     <img src={p.images[0]} alt={`${p.title} preview 1`} loading="lazy" />
                   </div>
                   <div className="work-card-side">
+                    {/* Top-right thumb — shows the project TITLE as
+                        an overlay so each card immediately identifies
+                        its project at a glance. */}
                     <div className="work-card-side-media">
                       <img src={p.images[1]} alt={`${p.title} preview 2`} loading="lazy" />
+                      <div className="work-card-side-overlay work-card-side-overlay-title">
+                        <span className="work-card-side-kicker">Project</span>
+                        <h4 className="work-card-side-title">{p.title}</h4>
+                      </div>
                     </div>
+                    {/* Bottom-right thumb — short description/caption. */}
                     <div className="work-card-side-media">
                       <img src={p.images[2]} alt={`${p.title} preview 3`} loading="lazy" />
+                      <div className="work-card-side-overlay work-card-side-overlay-desc">
+                        <span className="work-card-side-kicker">About</span>
+                        {p.description && (
+                          <p className="work-card-side-desc">{p.description}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
