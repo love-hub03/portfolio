@@ -1,273 +1,215 @@
-import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  BallCollider,
-  Physics,
-  RigidBody,
-  CylinderCollider,
-  RapierRigidBody,
-} from "@react-three/rapier";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import "./styles/TechStack.css";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
- * Lightweight 3D TechStack scene.
+ * Bidirectional Parallax Tech Gallery.
  *
- * Intentionally minimal for maximum Chrome/GPU stability:
- *  - no EffectComposer / postprocessing / N8AO
- *  - no HDR or Environment() probe
- *  - no shadows, no clearcoat highlights from env
- *  - low-poly spheres (16x16)
- *  - DPR capped at 1.25, antialias off
+ * Three horizontal rows of large rounded-rectangle tech cards. As the
+ * visitor scrolls the page vertically, each row drifts horizontally —
+ * Row 1 left, Row 2 right, Row 3 left again — producing a calm, premium
+ * "gallery wall" parallax instead of a chaotic marquee.
  *
- * We DO NOT pre-check WebGL availability here. The real 3D scene just
- * tries to render; if the browser throws while creating the WebGL
- * context or the GPU process crashes, the <TechStackBoundary> in
- * TechStackSafe.tsx catches it and swaps in <TechStackFallback />.
+ * Implementation notes:
+ *  - Pure React + CSS + GSAP ScrollTrigger. No Three.js, no canvas.
+ *  - Each row is a fixed-width track wider than the viewport so there's
+ *    real travel distance to animate over. The outer .ts-row-viewport
+ *    is `overflow: hidden` so card edges dissolve cleanly off-screen.
+ *  - Horizontal travel is computed per-row from its actual scroll
+ *    overflow so the motion amount adapts to the viewport width.
+ *  - `scrub: 1` ties motion to scroll position with a tiny lag so it
+ *    feels like premium parallax rather than snapping 1:1.
+ *  - `prefers-reduced-motion` disables scroll-linked motion entirely
+ *    and leaves the rows in their resting centred position.
+ *
+ * Assets: reuses the existing /images/*.webp and /images/*.png tech
+ * logos. Keep the layout wider than the viewport by duplicating the
+ * card set inside each row — this also guarantees the visible strip is
+ * always filled regardless of how much the row has drifted.
  */
 
-const textureLoader = new THREE.TextureLoader();
+type Card = {
+  src: string;
+  label: string;
+  /** Warm gradient tint behind the logo — picks the right brand hue. */
+  tint: string;
+};
 
-const imageUrls = [
-  "/images/express.webp",
-  "/images/javascript.webp",
-  "/images/mongo.webp",
-  "/images/mysql.webp",
-  "/images/next.webp",
-  "/images/next1.webp",
-  "/images/next2.webp",
-  "/images/nextBL.webp",
-  "/images/node.webp",
-  "/images/node2.webp",
-  "/images/react.webp",
-  "/images/react2.webp",
-  "/images/typescript.webp",
-  "/images/placeholder.webp",
+// Three rows of five cards each. Tints are subtle warm-leaning accents
+// so the gallery stays on brand with the rest of the portfolio.
+const row1: Card[] = [
+  { src: "/images/reacts.png", label: "React", tint: "rgba(97, 218, 251, 0.18)" },
+  { src: "/images/typescripts.png", label: "TypeScript", tint: "rgba(49, 120, 198, 0.20)" },
+  { src: "/images/js.png", label: "JavaScript", tint: "rgba(247, 223, 30, 0.18)" },
+  { src: "/images/nextjss.png", label: "Next.js", tint: "rgba(255, 255, 255, 0.10)" },
+  { src: "/images/mongoss.png", label: "MongoDB", tint: "rgba(67, 153, 52, 0.18)" },
 ];
 
-// Texture pool — loaded once at module scope so every ball reuses the
-// same GPU upload instead of re-decoding the PNGs on every mount.
-const textures = imageUrls.map((url) => {
-  const t = textureLoader.load(url);
-  t.anisotropy = 2; // cheap sharpness win, no perf cost
-  return t;
-});
+const row2: Card[] = [
+  { src: "/images/express.png", label: "Express", tint: "rgba(255, 255, 255, 0.08)" },
+  { src: "/images/firebases.png", label: "Firebase", tint: "rgba(255, 160, 60, 0.20)" },
+  { src: "/images/node.webp", label: "Node.js", tint: "rgba(104, 160, 99, 0.18)" },
+  { src: "/images/mysql.webp", label: "MySQL", tint: "rgba(0, 117, 143, 0.20)" },
+  { src: "/images/react2.webp", label: "React Native", tint: "rgba(97, 218, 251, 0.18)" },
+];
 
-// Lighter sphere geometry (was 20x20). 16x16 is visually indistinguishable
-// at this camera distance and cuts vertex count by ~36%.
-const sphereGeometry = new THREE.SphereGeometry(1, 16, 16);
+const row3: Card[] = [
+  { src: "/images/javascript.webp", label: "ES2024", tint: "rgba(247, 223, 30, 0.18)" },
+  { src: "/images/typescript.webp", label: "TS 5", tint: "rgba(49, 120, 198, 0.20)" },
+  { src: "/images/next1.webp", label: "App Router", tint: "rgba(255, 255, 255, 0.10)" },
+  { src: "/images/mongo.webp", label: "Atlas", tint: "rgba(67, 153, 52, 0.18)" },
+  { src: "/images/express.webp", label: "REST / GQL", tint: "rgba(255, 160, 102, 0.18)" },
+];
 
-// KEEPING 30 SPHERES — stable seed so hot-reload doesn't reshuffle scale.
-const spheres = [...Array(30)].map(() => ({
-  scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
-}));
-
-type SphereProps = {
-  vec?: THREE.Vector3;
-  scale: number;
-  r?: typeof THREE.MathUtils.randFloatSpread;
-  material: THREE.MeshStandardMaterial;
-  isActive: boolean;
+type RowProps = {
+  cards: Card[];
+  direction: 1 | -1;
+  /** Relative speed multiplier so rows 1 & 3 aren't perfectly symmetric. */
+  intensity?: number;
 };
 
-function SphereGeo({
-  vec = new THREE.Vector3(),
-  scale,
-  r = THREE.MathUtils.randFloatSpread,
-  material,
-  isActive,
-}: SphereProps) {
-  const api = useRef<RapierRigidBody | null>(null);
-
-  useFrame((_state, delta) => {
-    if (!isActive || !api.current) return;
-
-    delta = Math.min(0.1, delta);
-
-    const position = api.current.translation();
-    const impulse = vec
-      .set(position.x, position.y, position.z)
-      .normalize()
-      .multiply(
-        new THREE.Vector3(
-          -45 * delta * scale,
-          -130 * delta * scale,
-          -45 * delta * scale
-        )
-      );
-
-    api.current.applyImpulse(impulse, true);
-  });
-
-  return (
-    <RigidBody
-      linearDamping={0.75}
-      angularDamping={0.15}
-      friction={0.2}
-      position={[r(20), r(20) - 25, r(20) - 10]}
-      ref={api}
-      colliders={false}
-    >
-      <BallCollider args={[scale]} />
-      <CylinderCollider
-        rotation={[Math.PI / 2, 0, 0]}
-        position={[0, 0, 1.2 * scale]}
-        args={[0.15 * scale, 0.275 * scale]}
-      />
-      <mesh
-        castShadow={false}
-        receiveShadow={false}
-        scale={scale}
-        geometry={sphereGeometry}
-        material={material}
-        rotation={[0.3, 1, 1]}
-      />
-    </RigidBody>
-  );
-}
-
-type PointerProps = {
-  vec?: THREE.Vector3;
-  isActive: boolean;
-};
-
-function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
-  const ref = useRef<RapierRigidBody>(null);
-
-  useFrame(({ pointer, viewport }) => {
-    if (!isActive || !ref.current) return;
-
-    const targetVec = vec.lerp(
-      new THREE.Vector3(
-        (pointer.x * viewport.width) / 2,
-        (pointer.y * viewport.height) / 2,
-        0
-      ),
-      0.2
-    );
-
-    ref.current.setNextKinematicTranslation(targetVec);
-  });
-
-  return (
-    <RigidBody
-      position={[100, 100, 100]}
-      type="kinematicPosition"
-      colliders={false}
-      ref={ref}
-    >
-      <BallCollider args={[2]} />
-    </RigidBody>
-  );
-}
-
-const TechStack = () => {
-  const [isActive, setIsActive] = useState(false);
+const Row = ({ cards, direction, intensity = 1 }: RowProps) => {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const section = document.querySelector(".techstack");
-      if (!section) return;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return;
 
-      const rect = section.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight && rect.bottom > 0;
-      setIsActive(inView);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches;
+    if (reduced) return;
+
+    // Compute how far we can drift the track inside its viewport before
+    // running out of cards. This is the natural "parallax runway".
+    const compute = () => {
+      const overflow = Math.max(
+        track.scrollWidth - viewport.clientWidth,
+        0
+      );
+      // Use ~60% of the available overflow so cards never slam into the
+      // edge; feels closer to a cinematic pan than a hard marquee.
+      return overflow * 0.6 * intensity;
     };
 
-    handleScroll();
+    let travel = compute();
 
-    const clickIntervals: number[] = [];
-    const links = document.querySelectorAll(".header a");
-    const clickHandlers: Array<() => void> = [];
+    // Start position: shift the track so the "home" frame centres the
+    // cards regardless of direction. Going left means start further
+    // right, going right means start further left.
+    gsap.set(track, { x: direction === -1 ? travel / 2 : -travel / 2 });
 
-    links.forEach((elem) => {
-      const handler = () => {
-        const interval = window.setInterval(() => {
-          handleScroll();
-        }, 10);
-
-        clickIntervals.push(interval);
-
-        window.setTimeout(() => {
-          window.clearInterval(interval);
-        }, 1000);
-      };
-
-      clickHandlers.push(handler);
-      elem.addEventListener("click", handler);
+    const trigger = ScrollTrigger.create({
+      trigger: viewport,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 1,
+      onUpdate: (self) => {
+        const progress = self.progress; // 0 → 1 over the whole visible pass
+        // Map 0..1 to -0.5..+0.5 so the centre of the section shows the
+        // resting frame, not the beginning of the drift.
+        const offset = (progress - 0.5) * travel * direction;
+        gsap.to(track, {
+          x: -offset + (direction === -1 ? travel / 2 : -travel / 2),
+          duration: 0.4,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      },
     });
 
-    window.addEventListener("scroll", handleScroll);
+    const onResize = () => {
+      travel = compute();
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", onResize);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-
-      links.forEach((elem, index) => {
-        elem.removeEventListener("click", clickHandlers[index]);
-      });
-
-      clickIntervals.forEach((id) => window.clearInterval(id));
+      trigger.kill();
+      window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [direction, intensity]);
 
-  // Stable materials — one per texture, created once. Previously some
-  // versions of this file used MeshPhysicalMaterial with clearcoat, which
-  // requires the PhysicallyCorrectLights pipeline and is noticeably heavier
-  // on weaker GPUs. MeshStandardMaterial renders nearly identical at this
-  // distance and is much kinder on the Chrome GPU process.
-  const materials = useMemo(() => {
-    return textures.map(
-      (texture) =>
-        new THREE.MeshStandardMaterial({
-          map: texture,
-          emissive: new THREE.Color("#ffffff"),
-          emissiveMap: texture,
-          emissiveIntensity: 0.2,
-          metalness: 0.25,
-          roughness: 0.85,
-        })
-    );
+  // Duplicate the card set so the track is guaranteed wider than the
+  // viewport (needed for the parallax runway) and visibly full at both
+  // ends of the drift.
+  const doubled = [...cards, ...cards];
+
+  return (
+    <div className="ts-row-viewport" ref={viewportRef}>
+      <div className="ts-row-track" ref={trackRef}>
+        {doubled.map((card, i) => (
+          <article
+            className="ts-card"
+            key={`${card.label}-${i}`}
+            style={{ ["--tint" as string]: card.tint }}
+            data-cursor="disable"
+          >
+            <div className="ts-card-glow" aria-hidden="true" />
+            <div className="ts-card-media">
+              <img src={card.src} alt={card.label} loading="lazy" />
+            </div>
+            <div className="ts-card-label">
+              <span>{card.label}</span>
+            </div>
+            <div className="ts-card-sheen" aria-hidden="true" />
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TechStack = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // Soft fade/rise on the heading so the gallery doesn't just pop in.
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const heading = section.querySelector(".ts-heading");
+    if (!heading) return;
+
+    const tween = gsap.from(heading, {
+      y: 40,
+      opacity: 0,
+      duration: 0.9,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: section,
+        start: "top 80%",
+      },
+    });
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
   }, []);
 
   return (
-    <div className="techstack">
-      <h2> My Techstack</h2>
+    <section className="techstack" ref={sectionRef}>
+      <div className="ts-header">
+        <span className="ts-eyebrow">what I build with</span>
+        <h2 className="ts-heading">My Tech Stack</h2>
+      </div>
 
-      <Canvas
-        dpr={[1, 1.25]}
-        gl={{
-          alpha: true,
-          antialias: false,
-          powerPreference: "high-performance",
-          preserveDrawingBuffer: false,
-          // failIfMajorPerformanceCaveat:false lets the page still try to
-          // render on software WebGL. If it genuinely can't, the error
-          // boundary kicks in and the fallback component renders.
-          failIfMajorPerformanceCaveat: false,
-        }}
-        camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
-        onCreated={(state) => {
-          state.gl.toneMappingExposure = 1.05;
-        }}
-        className="tech-canvas"
-      >
-        {/* lighter lighting, no environment map */}
-        <ambientLight intensity={1.6} />
-        <directionalLight position={[3, 5, 8]} intensity={1.5} />
-        <pointLight position={[-6, -2, 6]} intensity={1.2} />
+      <div className="ts-gallery" aria-label="Technology stack gallery">
+        <Row cards={row1} direction={-1} intensity={1.0} />
+        <Row cards={row2} direction={1} intensity={1.15} />
+        <Row cards={row3} direction={-1} intensity={0.9} />
+      </div>
 
-        <Physics gravity={[0, 0, 0]}>
-          <Pointer isActive={isActive} />
-          {spheres.map((props, i) => (
-            <SphereGeo
-              key={i}
-              {...props}
-              material={materials[i % materials.length]}
-              isActive={isActive}
-            />
-          ))}
-        </Physics>
-      </Canvas>
-    </div>
+      {/* Soft edge vignettes so the cards dissolve off the left & right
+          edges instead of hitting a hard clip. */}
+      <div className="ts-edge ts-edge-l" aria-hidden="true" />
+      <div className="ts-edge ts-edge-r" aria-hidden="true" />
+    </section>
   );
 };
 

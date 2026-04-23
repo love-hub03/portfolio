@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import About from "./About";
 import Career from "./Career";
 import Contact from "./Contact";
@@ -16,15 +16,11 @@ import { useLoading } from "../context/LoadingProvider";
 import { setProgress } from "./Loading";
 
 const MainContainer = () => {
-  const [isDesktopView, setIsDesktopView] = useState<boolean>(
-    window.innerWidth > 1024
-  );
   const { setLoading } = useLoading();
 
   useEffect(() => {
     const resizeHandler = () => {
       setSplitText();
-      setIsDesktopView(window.innerWidth > 1024);
     };
 
     resizeHandler();
@@ -85,7 +81,9 @@ const MainContainer = () => {
               <GirlCharacter />
             </div>
 
-            {isDesktopView && <TechStackSafe />}
+            {/* Bidirectional parallax tech gallery — pure CSS+GSAP, renders
+                on every breakpoint. Mobile narrows to 2 rows via CSS. */}
+            <TechStackSafe />
 
             <WhatIDo />
             <Career />

@@ -1,0 +1,385 @@
+/* ============================================================
+   TechStack.css
+   Bidirectional Parallax Tech Gallery.
+
+   Layout:
+     section.techstack
+       .ts-header  (eyebrow + h2)
+       .ts-gallery
+         .ts-row-viewport  (overflow hidden; one per row)
+           .ts-row-track   (the thing GSAP translates on scroll)
+             article.ts-card × N
+       .ts-edge-l / .ts-edge-r  (vignette fades)
+
+   Visual language:
+     - Large rounded rectangle cards (aspect ~5:4) on a dark glass
+       surface, 1px luminous border, soft drop shadow.
+     - Centred logo, subtle warm accent glow on hover that matches
+       the rest of the portfolio's orange palette.
+     - No chaotic motion — rows drift gently in opposite directions
+       tied to page scroll via ScrollTrigger.
+   ============================================================ */
+
+.techstack {
+  position: relative;
+  width: 100%;
+  padding: 140px 0 160px;
+  /* overflow clipped so the horizontal tracks never cause a page
+     scrollbar — only the rows scroll, never the document. */
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ---- Header ------------------------------------------------- */
+.ts-header {
+  text-align: center;
+  margin-bottom: 72px;
+  padding: 0 24px;
+}
+.ts-eyebrow {
+  display: inline-block;
+  font-family: "Roboto", "Geist", sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255, 160, 102, 0.85);
+  margin-bottom: 18px;
+
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 160, 102, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 160, 102, 0.05);
+}
+.ts-heading {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: clamp(38px, 6vw, 72px);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin: 0;
+  color: #f2ece9;
+  text-transform: none;
+  line-height: 1.05;
+
+  background: linear-gradient(
+    180deg,
+    #f6efe9 0%,
+    #d7c9c0 55%,
+    #b89a8d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---- Gallery wrapper --------------------------------------- */
+.ts-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+/* ---- One parallax row -------------------------------------- */
+.ts-row-viewport {
+  width: 100%;
+  overflow: hidden;
+  /* Slight vertical breathing so rows don't feel crammed. */
+  padding: 2px 0;
+}
+.ts-row-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 22px;
+  padding: 0 24px;
+  will-change: transform;
+}
+
+/* ============================================================
+   The card.
+
+   Glassmorphic dark panel with a subtle warm tint layer,
+   glossy sheen across the top, and a soft orange halo on hover
+   so interaction feels premium rather than flat.
+   ============================================================ */
+.ts-card {
+  --tint: rgba(255, 255, 255, 0.08);
+
+  position: relative;
+  flex: 0 0 auto;
+  width: 280px;
+  height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  border-radius: 26px;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 40%,
+      rgba(0, 0, 0, 0.35) 100%
+    ),
+    radial-gradient(
+      120% 90% at 15% 0%,
+      var(--tint) 0%,
+      transparent 60%
+    ),
+    rgba(22, 17, 22, 0.7);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+
+  box-shadow:
+    0 20px 40px -18px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  transition:
+    transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 400ms ease,
+    box-shadow 400ms ease;
+
+  cursor: default;
+}
+.ts-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 180, 130, 0.35);
+  box-shadow:
+    0 28px 60px -20px rgba(0, 0, 0, 0.65),
+    0 0 40px rgba(255, 140, 70, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* Warm accent halo that appears on hover — sits behind the card
+   content so it glows around the logo. */
+.ts-card-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background: radial-gradient(
+    60% 60% at 50% 45%,
+    rgba(255, 160, 102, 0.22) 0%,
+    rgba(255, 160, 102, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 500ms ease;
+  z-index: 0;
+}
+.ts-card:hover .ts-card-glow {
+  opacity: 1;
+}
+
+/* Logo area — centred, generous padding so the image breathes. */
+.ts-card-media {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+}
+.ts-card-media img {
+  max-width: 84px;
+  max-height: 84px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 20px rgba(255, 160, 102, 0.0));
+  transition: filter 400ms ease, transform 500ms ease;
+}
+.ts-card:hover .ts-card-media img {
+  transform: scale(1.05);
+  filter:
+    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 0 18px rgba(255, 160, 102, 0.35));
+}
+
+/* Label row — thin warm rule above, small caps below. */
+.ts-card-label {
+  position: relative;
+  z-index: 1;
+  padding: 14px 22px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+.ts-card-label span {
+  font-family: "Poppins", "Geist", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  color: #d7d0db;
+  transition: color 300ms ease;
+}
+.ts-card:hover .ts-card-label span {
+  color: #ffa066;
+}
+
+/* Glossy top sheen — gives the card that polished "display glass"
+   feel seen in the reference. Purely decorative. */
+.ts-card-sheen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  pointer-events: none;
+  z-index: 1;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* ============================================================
+   Edge vignettes — left & right gradient overlays so cards dissolve
+   off the viewport rather than clipping against a hard edge.
+   ============================================================ */
+.ts-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 160px;
+  pointer-events: none;
+  z-index: 2;
+}
+.ts-edge-l {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    #0b080c 0%,
+    rgba(11, 8, 12, 0.8) 40%,
+    rgba(11, 8, 12, 0) 100%
+  );
+}
+.ts-edge-r {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    #0b080c 0%,
+    rgba(11, 8, 12, 0.8) 40%,
+    rgba(11, 8, 12, 0) 100%
+  );
+}
+
+/* ============================================================
+   Tablets
+   ============================================================ */
+@media only screen and (max-width: 1024px) {
+  .techstack {
+    padding: 110px 0 130px;
+  }
+  .ts-header {
+    margin-bottom: 56px;
+  }
+  .ts-gallery {
+    gap: 22px;
+  }
+  .ts-row-track {
+    gap: 18px;
+    padding: 0 18px;
+  }
+  .ts-card {
+    width: 240px;
+    height: 190px;
+    border-radius: 22px;
+  }
+  .ts-card-media img {
+    max-width: 72px;
+    max-height: 72px;
+  }
+  .ts-edge {
+    width: 110px;
+  }
+}
+
+/* ============================================================
+   Phones — tighten cards, drop the third row (too much chrome
+   for a small screen), keep the bidirectional feel with just two.
+   ============================================================ */
+@media only screen and (max-width: 640px) {
+  .techstack {
+    padding: 80px 0 100px;
+  }
+  .ts-header {
+    margin-bottom: 42px;
+  }
+  .ts-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 14px;
+  }
+  .ts-gallery {
+    gap: 16px;
+  }
+  .ts-row-track {
+    gap: 14px;
+    padding: 0 14px;
+  }
+  .ts-card {
+    width: 180px;
+    height: 150px;
+    border-radius: 18px;
+  }
+  .ts-card-media {
+    padding: 18px;
+  }
+  .ts-card-media img {
+    max-width: 56px;
+    max-height: 56px;
+  }
+  .ts-card-label {
+    padding: 10px 14px 12px;
+  }
+  .ts-card-label span {
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+  .ts-edge {
+    width: 60px;
+  }
+  /* Hide the 3rd row on narrow screens — 2 rows of bidirectional
+     motion still reads as the same effect, without eating the
+     viewport. */
+  .ts-gallery .ts-row-viewport:nth-child(3) {
+    display: none;
+  }
+}
+
+/* ============================================================
+   Respect reduced motion — cards sit still, no scroll-linked drift.
+   The GSAP effect is already skipped in the component, but this
+   keeps hover transforms subtle too.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .ts-card,
+  .ts-card-media img,
+  .ts-card-glow,
+  .ts-card-label span {
+    transition: none;
+  }
+  .ts-card:hover {
+    transform: none;
+  }
+  .ts-card:hover .ts-card-media img {
+    transform: none;
+  }
+}
