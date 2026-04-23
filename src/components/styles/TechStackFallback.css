@@ -21,6 +21,11 @@
   overflow: hidden;
   isolation: isolate;
 
+  /* Section-wide body font — Roboto for any incidental copy. The
+     heading overrides with Poppins below. Both are imported via
+     the Google Fonts @import in src/index.css. */
+  font-family: "Roboto", "Geist", sans-serif;
+
   /* Warm palette — matches the site accent + the orange point-light
      used in the real Three.js scene. */
   --tsf-accent: var(--accentColor, #ffa066);
@@ -70,10 +75,15 @@
   );
 }
 
-/* ---------- Heading ---------- */
+/* ---------- Heading ----------
+   Poppins for the display heading — modern, premium, pairs well
+   with the warm accent glow. The uppercase + wide tracking is kept
+   from the base .techstack h2 rule in index.css. */
 .techstack-fallback h2 {
   z-index: 2;
-  letter-spacing: 4px;
+  font-family: "Poppins", "Geist", sans-serif;
+  font-weight: 600;
+  letter-spacing: 6px;
 }
 
 /* ---------- Stage ---------- */
