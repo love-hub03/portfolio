@@ -289,6 +289,46 @@
   line-height: 28px;
   font-weight: 500;
   font-family: "Poppins", "Geist", sans-serif;
+  /* TypingName always renders two spans separated by <br /> (empty
+     lines fall back to \u00A0), so the h1 height is stable across
+     type/delete frames without needing per-breakpoint min-heights. */
+}
+
+/* ------------------------------------------------------------------
+   Typing effect for the hero name.
+   - .typing-line : inline-block so each rendered line keeps its own
+     baseline and the blinking caret sits cleanly after the last
+     character. white-space: pre preserves any leading whitespace
+     that might sneak in during delete frames.
+   - .typing-caret : 2px orange rule with a soft warm glow, blinks
+     via a simple opacity keyframe. Matches the accent palette.
+   ------------------------------------------------------------------ */
+.typing-line {
+  display: inline-block;
+  white-space: pre;
+  vertical-align: baseline;
+}
+.typing-caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: var(--accentColor, #ffa066);
+  border-radius: 1px;
+  box-shadow: 0 0 10px rgba(255, 160, 102, 0.55);
+  animation: typing-caret-blink 1s steps(2, start) infinite;
+}
+@keyframes typing-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .typing-caret {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* .landing-intro h1 span {
