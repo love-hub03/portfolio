@@ -5,6 +5,7 @@
   position: relative;
   height: var(--vh);
 }
+
 .landing-container {
   width: var(--cWidth);
   margin: auto;
@@ -12,6 +13,7 @@
   position: relative;
   max-width: var(--cMaxWidth);
 }
+
 .landing-circle1 {
   top: 0%;
   left: 0%;
@@ -24,13 +26,11 @@
   filter: blur(30px);
   border-radius: 50%;
   animation: loadingCircle 5s linear infinite;
-  /* Promote to a persistent GPU layer so the blur result is cached and not
-     re-rasterized every scroll frame — critical for smooth section
-     transitions since this element is position:fixed and always on-screen. */
   will-change: transform;
   transform: translateZ(0);
   contain: paint;
 }
+
 .nav-fade {
   position: fixed;
   top: 0;
@@ -46,6 +46,7 @@
   opacity: 0;
   left: 0;
 }
+
 @keyframes loadingCircle {
   0% {
     transform: translate(-95%, -75%) rotateZ(0deg);
@@ -72,11 +73,13 @@
   will-change: transform;
   contain: paint;
 }
+
 @keyframes loadingCircle2 {
   100% {
     transform: translate(calc(100% - 2px), -50%) rotate(360deg);
   }
 }
+
 .landing-video,
 .landing-image {
   position: absolute;
@@ -85,11 +88,13 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
 .landing-image img {
   height: 100%;
   z-index: 2;
   position: relative;
 }
+
 .character-rim {
   position: absolute;
   width: 400px;
@@ -107,6 +112,7 @@
   will-change: opacity, transform;
   contain: paint;
 }
+
 .character-model {
   height: 80%;
   height: 80vh;
@@ -119,7 +125,9 @@
   z-index: 0;
   bottom: 50px;
   pointer-events: inherit;
+  perspective: 700px;
 }
+
 .character-model::after {
   content: "";
   width: 100vw;
@@ -135,6 +143,7 @@
   z-index: 9;
   position: absolute;
 }
+
 .character-model::before {
   content: "";
   width: 100vw;
@@ -146,19 +155,19 @@
   z-index: 9;
   position: absolute;
 }
+
 .character-loaded .character-rim {
   animation: backlight 3s forwards;
   animation-delay: 0.3s;
   opacity: 0;
 }
+
 .character-model canvas {
   position: relative;
   pointer-events: none;
   z-index: 2;
 }
-.character-model {
-  perspective: 700px;
-}
+
 /* ---------- Shared Hero + About stage ---------- */
 .hero-about-stage {
   position: relative;
@@ -212,8 +221,6 @@
   .girl-glow {
     position: absolute;
     left: 50%;
-    /* Anchored inside the Landing area (first 100vh of stage), not the
-       whole .hero-about-stage (which also contains About). */
     top: calc(var(--vh) / 2);
     bottom: auto;
     width: 220px;
@@ -227,11 +234,6 @@
   .girl-character {
     position: absolute;
     left: 50%;
-    /* Vertically center on the Landing viewport. Landing has
-       height: var(--vh) and is the first child of .hero-about-stage,
-       so top = vh/2 = middle of Landing. Image sits between the
-       "LOVEPREET SAINI" block (top) and the "A Creative Web Developer"
-       block (bottom) without ever crossing into About below. */
     top: calc(var(--vh) / 2);
     bottom: auto;
     transform: translate(-50%, -50%) !important;
@@ -239,8 +241,6 @@
     width: min(72vw, 300px);
     height: auto;
     max-width: none;
-    /* Hard-cap so she can't grow tall enough to collide with the
-       name above or tagline below. */
     max-height: 55vh;
 
     object-fit: contain;
@@ -250,14 +250,12 @@
     animation: none !important;
     transition: none !important;
 
-    /* Behind the text blocks (which use z-index: 9) so name/tagline
-       stay readable over her sweater. */
     z-index: 5;
     pointer-events: none;
   }
 }
 /* ---------- /Shared Hero + About stage ---------- */
-/* ---------- /Shared Hero + About stage ---------- */
+
 .character-hover {
   position: absolute;
   width: 280px;
@@ -268,12 +266,14 @@
   transform: translate(-50%, -50%);
   border-radius: 50%;
 }
+
 .landing-intro {
   position: absolute;
   z-index: 9;
   top: 12%;
   left: 0;
 }
+
 .landing-intro h2 {
   margin: 0;
   color: var(--accentColor);
@@ -282,62 +282,62 @@
   letter-spacing: 2px;
 }
 
+/* ===== FIXED HERO NAME STYLES ===== */
 .landing-intro h1 {
   margin: 0;
   letter-spacing: 2px;
   font-size: 28px;
-  line-height: 28px;
+  line-height: 1;
   font-weight: 500;
   font-family: "Poppins", "Geist", sans-serif;
-  /* TypingName always renders two spans separated by <br /> (empty
-     lines fall back to \u00A0), so the h1 height is stable across
-     type/delete frames without needing per-breakpoint min-heights. */
 }
 
-/* ------------------------------------------------------------------
-   Typing effect for the hero name.
-   - .typing-stack : flex column wraps the two lines so they stack
-     deterministically without <br /> or inline whitespace hacks.
-   - .typing-line  : block-level so each line owns a row; white-space
-     preserved so the caret sits flush against the last character.
-   - .typing-caret : 2px orange rule with a soft warm glow, blinks
-     via a simple opacity keyframe. Matches the accent palette.
-   ------------------------------------------------------------------ */
 .typing-stack {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
-.typing-line {
-  display: block;
-  white-space: pre;
-  line-height: inherit;
+
+.typing-line-row {
+  display: flex;
+  align-items: center;
+  min-height: 1.05em;
+  white-space: nowrap;
 }
+
+.typing-line-text {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
 .typing-caret {
   display: inline-block;
   width: 2px;
-  height: 0.95em;
+  height: 0.9em;
   margin-left: 4px;
-  vertical-align: -0.12em;
   background: var(--accentColor, #ffa066);
-  border-radius: 1px;
+  border-radius: 2px;
   box-shadow: 0 0 10px rgba(255, 160, 102, 0.55);
+  flex-shrink: 0;
+  align-self: center;
   animation: typing-caret-blink 1s steps(2, start) infinite;
 }
+
 @keyframes typing-caret-blink {
   50% {
     opacity: 0;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .typing-caret {
     animation: none;
     opacity: 0;
   }
 }
-
-/* .landing-intro h1 span {
-   font-weight: 200; 
-} */
+/* ===== END FIXED HERO NAME STYLES ===== */
 
 .landing-info {
   position: absolute;
@@ -347,6 +347,7 @@
   top: inherit;
   z-index: 9;
 }
+
 .landing-info h3 {
   font-size: 22px;
   letter-spacing: 2px;
@@ -354,6 +355,7 @@
   color: var(--accentColor);
   margin: 0;
 }
+
 .landing-info h2 {
   margin: 0;
   margin-top: -20px;
@@ -368,10 +370,12 @@
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+
 .landing-h2-info-1 {
   position: absolute;
   top: 0;
 }
+
 h2.landing-info-h2 {
   color: #ff8c47;
   font-size: 42px;
@@ -381,9 +385,6 @@ h2.landing-info-h2 {
   font-weight: 600;
   position: relative;
   margin-left: -5px;
-  /* Children are now <span> (valid HTML). Use flex so the two words
-     sit side-by-side with controlled spacing instead of relying on
-     the old block <div> auto-stacking behaviour. */
   display: flex;
   align-items: center;
   gap: 10px;
@@ -393,73 +394,83 @@ h2.landing-info-h2 {
 .landing-h2-info,
 .landing-h2-info-2 {
   display: inline-block;
-  /* Text spans sit above any ambient hero decoration (character glow,
-     particles, background fades). Without this, certain decorative
-     layers inherit a higher stacking priority and the lower half of
-     "WEB DEVELOPER" reads as clipped. */
   position: relative;
   z-index: 2;
 }
+
 .landing-h2-2 {
   position: absolute;
   top: 0;
 }
-/* Legacy dark gradient mask that used to sit on top of "WEB DEVELOPER"
-   to hide the 3D character's head poking up from below. The character
-   layout changed and this overlay now just paints a dark band across
-   the lower half of the heading, making it look cut off. Disabled —
-   the hero's actual page background already provides the depth. */
+
+/* Removed black overlay that was cutting text */
 .landing-info-h2::after {
   content: none;
   display: none;
 }
+
+/* ================= RESPONSIVE ================= */
+
 @media screen and (min-width: 500px) {
   .landing-circle2 {
     display: block;
   }
+
   .character-model {
     z-index: 0;
   }
+
   .landing-info h3 {
     font-size: 18px;
   }
+
   .landing-intro h2 {
     font-size: 18px;
   }
+
   .landing-intro h1 {
     font-size: 30px;
-    line-height: 30px;
+    line-height: 1;
   }
+
   .landing-info h2 {
     font-size: 35px;
     line-height: 40px;
   }
+
   h2.landing-info-h2 {
     font-size: 38px;
   }
 }
+
 @media screen and (min-width: 768px) {
   .character-model {
     height: 80vh;
   }
+
   .landing-intro h2 {
     font-size: 25px;
   }
+
   .landing-intro h1 {
     font-size: 40px;
-    line-height: 35px;
+    line-height: 1;
   }
+
   .landing-info h3 {
     font-size: 25px;
   }
+
   .landing-info h2 {
     font-size: 45px;
     line-height: 42px;
   }
+
   h2.landing-info-h2 {
     font-size: 55px;
   }
 }
+
 @media screen and (min-width: 1025px) {
   .character-model {
     height: 100vh;
@@ -467,10 +478,12 @@ h2.landing-info-h2 {
     z-index: 11;
     position: fixed;
   }
+
   .character-model::after,
   .character-model::before {
     display: none;
   }
+
   .landing-intro {
     top: 50%;
     left: auto;
@@ -481,9 +494,6 @@ h2.landing-info-h2 {
   .landing-info {
     bottom: auto;
     top: 51%;
-    /* Must beat .character-model (position:fixed; z-index:11) so the
-       "WEB DEVELOPER" heading never sits under the fixed character
-       layer on desktop. */
     z-index: 12;
     text-align: left;
     transform: translate(0%, -50%);
@@ -491,6 +501,7 @@ h2.landing-info-h2 {
     left: 66%;
   }
 }
+
 @media screen and (min-width: 1200px) {
   .landing-intro {
     top: 50%;
@@ -509,21 +520,26 @@ h2.landing-info-h2 {
     left: 70%;
   }
 }
+
 @media screen and (min-width: 1600px) {
   .landing-intro h2 {
     font-size: 35px;
   }
+
   .landing-intro h1 {
     font-size: 60px;
-    line-height: 55px;
+    line-height: 1;
   }
+
   .landing-info h3 {
     font-size: 35px;
   }
+
   .landing-info h2 {
     font-size: 65px;
     line-height: 62px;
   }
+
   h2.landing-info-h2 {
     font-size: 75px;
   }
