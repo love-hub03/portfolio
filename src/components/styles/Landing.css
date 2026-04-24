@@ -296,17 +296,21 @@
 
 /* ------------------------------------------------------------------
    Typing effect for the hero name.
-   - .typing-line : inline-block so each rendered line keeps its own
-     baseline and the blinking caret sits cleanly after the last
-     character. white-space: pre preserves any leading whitespace
-     that might sneak in during delete frames.
+   - .typing-stack : flex column wraps the two lines so they stack
+     deterministically without <br /> or inline whitespace hacks.
+   - .typing-line  : block-level so each line owns a row; white-space
+     preserved so the caret sits flush against the last character.
    - .typing-caret : 2px orange rule with a soft warm glow, blinks
      via a simple opacity keyframe. Matches the accent palette.
    ------------------------------------------------------------------ */
+.typing-stack {
+  display: flex;
+  flex-direction: column;
+}
 .typing-line {
-  display: inline-block;
+  display: block;
   white-space: pre;
-  vertical-align: baseline;
+  line-height: inherit;
 }
 .typing-caret {
   display: inline-block;
