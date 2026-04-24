@@ -23,7 +23,7 @@ const projects: Project[] = [
       "A premium storefront with real-time cart sync, Stripe checkout, and a custom CMS for catalog management.",
     image: "/images/project1.png",
     liveUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/love-hub03",
     technologies: ["Next.js", "TypeScript", "Stripe", "MongoDB", "Tailwind"],
   },
   {
@@ -33,7 +33,7 @@ const projects: Project[] = [
       "Multi-tenant SaaS analytics panel with live charts, role-based auth, and exportable reporting.",
     image: "/images/project2.png",
     liveUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/love-hub03",
     technologies: ["React", "Node.js", "PostgreSQL", "D3", "WebSockets"],
   },
   {
@@ -43,7 +43,7 @@ const projects: Project[] = [
       "A clean responsive weather application using live weather APIs with modern UI and quick city search.",
     image: "/images/project3.png",
     liveUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/love-hub03",
     technologies: ["HTML", "CSS", "JavaScript", "Weather API"],
   },
   {
@@ -53,7 +53,7 @@ const projects: Project[] = [
       "Realtime encrypted chat with typing indicators, presence, and offline-first sync.",
     image: "/images/project4.png",
     liveUrl: "#",
-    githubUrl: "#",
+    githubUrl: "https://github.com/love-hub03",
     technologies: ["React Native", "Firebase", "WebSockets", "SQLite"],
   },
 ];
