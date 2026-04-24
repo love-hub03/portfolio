@@ -67,11 +67,17 @@ const Navbar = () => {
       <div className="header">
         {/* Top-left: brand logo. */}
         <a
-          href="./images/image.png"
+          href="#"
           className="navbar-title"
           data-cursor="disable"
+          aria-label="Home"
         >
-          Logo
+          <img
+            src="/images/logo.png"
+            alt="Logo"
+            className="navbar-logo"
+            draggable={false}
+          />
         </a>
 
         {/* Top-centre: horizontal glass pill. The `<ul>` IS the

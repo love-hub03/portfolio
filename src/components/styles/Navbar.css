@@ -41,19 +41,25 @@
   justify-self: start;
   pointer-events: auto;
 
-  font-family: "Poppins", "Geist", sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.4px;
-  color: #f2ece9;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
+  line-height: 0; /* kill inline-image gap */
 
-  text-shadow: 0 0 18px rgba(255, 160, 102, 0.15);
-  transition: color 240ms ease, text-shadow 240ms ease;
+  transition: filter 240ms ease, transform 240ms ease;
 }
-.navbar-title:hover {
-  color: var(--nav-accent);
-  text-shadow: 0 0 22px rgba(255, 160, 102, 0.35);
+.navbar-logo {
+  display: block;
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  user-select: none;
+  filter: drop-shadow(0 0 14px rgba(255, 160, 102, 0.18));
+  transition: filter 240ms ease, transform 240ms ease;
+}
+.navbar-title:hover .navbar-logo {
+  filter: drop-shadow(0 0 20px rgba(255, 160, 102, 0.45));
+  transform: translateY(-1px);
 }
 
 /* ============================================================
@@ -164,8 +170,8 @@
   .header {
     padding: 18px 28px;
   }
-  .navbar-title {
-    font-size: 16px;
+  .navbar-logo {
+    height: 32px;
   }
   .header ul {
     height: 52px;
@@ -194,8 +200,8 @@
        stays left, pill goes centred with a true auto-centre. */
     grid-template-columns: auto 1fr;
   }
-  .navbar-title {
-    font-size: 15px;
+  .navbar-logo {
+    height: 28px;
   }
   .header ul {
     /* In the 2-col layout, the pill sits in the 1fr right
