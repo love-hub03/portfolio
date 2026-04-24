@@ -2,12 +2,19 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import "./styles/Landing.css";
 
 /* ------------------------------------------------------------------
-   Looping typing effect for the hero name.
+   Looping typing effect for the hero name — two independent lines.
 
-   Types the full string "LOVEPREET SAINI" character-by-character,
-   holds briefly, deletes, holds, and repeats forever. Rendering always
-   keeps TWO lines present (LOVEPREET / SAINI) so the hero layout
-   height never jumps — empty lines fall back to a non-breaking space.
+   Sequence:
+     1. Type "LOVEPREET" on line 1, letter by letter
+     2. Then type "SAINI" on line 2, letter by letter
+     3. Hold the full two-line name briefly
+     4. Delete line 2 (SAINI) letter by letter
+     5. Delete line 1 (LOVEPREET) letter by letter
+     6. Short hold, repeat forever
+
+   Crucially, line 2 does NOT start showing characters until line 1 is
+   fully complete — the two lines are controlled by two independent
+   state values, not by splitting one combined string in real time.
 
    Timings (per brief):
      type     ≈ 100ms/char
@@ -18,18 +25,26 @@ import "./styles/Landing.css";
    Respects prefers-reduced-motion: renders the full name statically
    with no cursor, no loop.
    ------------------------------------------------------------------ */
-const TYPING_FULL = "LOVEPREET SAINI";
+const TYPING_LINE_1 = "LOVEPREET";
+const TYPING_LINE_2 = "SAINI";
 const TYPE_MS = 100;
 const DELETE_MS = 60;
 const PAUSE_FULL_MS = 1200;
 const PAUSE_EMPTY_MS = 400;
 
-type TypingPhase = "typing" | "pauseFull" | "deleting" | "pauseEmpty";
+type TypingPhase =
+  | "typing1"
+  | "typing2"
+  | "pauseFull"
+  | "deleting2"
+  | "deleting1"
+  | "pauseEmpty";
 
 const TypingName = () => {
   const [reduced, setReduced] = useState(false);
-  const [text, setText] = useState("");
-  const [phase, setPhase] = useState<TypingPhase>("typing");
+  const [line1, setLine1] = useState("");
+  const [line2, setLine2] = useState("");
+  const [phase, setPhase] = useState<TypingPhase>("typing1");
 
   // Reduced-motion probe — run once on mount.
   useEffect(() => {
@@ -37,64 +52,86 @@ const TypingName = () => {
     setReduced(mq.matches);
   }, []);
 
-  // Typing state machine. One setTimeout per phase tick; cleared on
-  // every rerun so there's never a stray timer during unmount or
-  // phase transitions.
+  // Typing state machine. One setTimeout per tick, cleared on every
+  // rerun so there's never a stray timer during phase transitions
+  // or unmount.
   useEffect(() => {
     if (reduced) return;
 
-    let timer: number;
-    if (phase === "typing") {
-      if (text.length < TYPING_FULL.length) {
+    let timer: number | undefined;
+
+    if (phase === "typing1") {
+      if (line1.length < TYPING_LINE_1.length) {
         timer = window.setTimeout(
-          () => setText(TYPING_FULL.slice(0, text.length + 1)),
+          () => setLine1(TYPING_LINE_1.slice(0, line1.length + 1)),
+          TYPE_MS
+        );
+      } else {
+        // Line 1 complete — hand off to line 2.
+        setPhase("typing2");
+      }
+    } else if (phase === "typing2") {
+      if (line2.length < TYPING_LINE_2.length) {
+        timer = window.setTimeout(
+          () => setLine2(TYPING_LINE_2.slice(0, line2.length + 1)),
           TYPE_MS
         );
       } else {
         setPhase("pauseFull");
-        return;
       }
     } else if (phase === "pauseFull") {
-      timer = window.setTimeout(() => setPhase("deleting"), PAUSE_FULL_MS);
-    } else if (phase === "deleting") {
-      if (text.length > 0) {
+      timer = window.setTimeout(() => setPhase("deleting2"), PAUSE_FULL_MS);
+    } else if (phase === "deleting2") {
+      if (line2.length > 0) {
         timer = window.setTimeout(
-          () => setText(TYPING_FULL.slice(0, text.length - 1)),
+          () => setLine2(TYPING_LINE_2.slice(0, line2.length - 1)),
+          DELETE_MS
+        );
+      } else {
+        setPhase("deleting1");
+      }
+    } else if (phase === "deleting1") {
+      if (line1.length > 0) {
+        timer = window.setTimeout(
+          () => setLine1(TYPING_LINE_1.slice(0, line1.length - 1)),
           DELETE_MS
         );
       } else {
         setPhase("pauseEmpty");
-        return;
       }
     } else if (phase === "pauseEmpty") {
-      timer = window.setTimeout(() => setPhase("typing"), PAUSE_EMPTY_MS);
+      timer = window.setTimeout(() => setPhase("typing1"), PAUSE_EMPTY_MS);
     }
 
-    return () => window.clearTimeout(timer);
-  }, [text, phase, reduced]);
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [phase, line1, line2, reduced]);
 
-  // Split the current string on the single space so we always render
-  // the two-line "LOVEPREET / SAINI" layout.
-  const displayed = reduced ? TYPING_FULL : text;
-  const spaceIdx = TYPING_FULL.indexOf(" ");
-  const line1 = displayed.slice(0, Math.min(displayed.length, spaceIdx));
-  const onSecondLine = displayed.length > spaceIdx;
-  const line2 = onSecondLine ? displayed.slice(spaceIdx + 1) : "";
+  // The caret lives on whichever line is currently active.
+  //   typing1  / deleting1 → line 1
+  //   typing2  / deleting2 → line 2
+  //   pauseFull            → line 2 (last-typed)
+  //   pauseEmpty           → line 1 (about to type)
+  const caretOnLine1 =
+    phase === "typing1" || phase === "deleting1" || phase === "pauseEmpty";
 
+  const displayedLine1 = reduced ? TYPING_LINE_1 : line1;
+  const displayedLine2 = reduced ? TYPING_LINE_2 : line2;
   const showCaret = !reduced;
 
   return (
     <>
       <span className="typing-line">
-        {line1 || "\u00A0"}
-        {showCaret && !onSecondLine && (
+        {displayedLine1 || "\u00A0"}
+        {showCaret && caretOnLine1 && (
           <span className="typing-caret" aria-hidden="true" />
         )}
       </span>
       <br />
       <span className="typing-line">
-        {line2 || "\u00A0"}
-        {showCaret && onSecondLine && (
+        {displayedLine2 || "\u00A0"}
+        {showCaret && !caretOnLine1 && (
           <span className="typing-caret" aria-hidden="true" />
         )}
       </span>
