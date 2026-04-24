@@ -1,4 +1,9 @@
-import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa6";
+import {
+  FaGithub,
+  FaInstagram,
+  FaLinkedinIn,
+  // FaXTwitter, // hidden for now — re-enable with the X icon block below
+} from "react-icons/fa6";
 import "./styles/SocialIcons.css";
 import { TbNotes } from "react-icons/tb";
 import { useEffect } from "react";
@@ -68,6 +73,13 @@ const SocialIcons = () => {
             <FaLinkedinIn />
           </a>
         </span>
+        {/* Twitter / X hidden for now — re-enable when an X account exists.
+        <span>
+          <a href="https://x.com" target="_blank" rel="noreferrer">
+            <FaXTwitter />
+          </a>
+        </span>
+        */}
         <span>
           <a
             href="https://www.instagram.com"

@@ -41,6 +41,17 @@ const Contact = () => {
             >
               Linkedin <MdArrowOutward />
             </a>
+            {/* Twitter / X hidden for now — re-enable when an X account exists.
+            <a
+              href="https://x.com"
+              target="_blank"
+              rel="noreferrer"
+              data-cursor="disable"
+              className="contact-social"
+            >
+              Twitter <MdArrowOutward />
+            </a>
+            */}
             <a
               href="https://www.instagram.com"
               target="_blank"
