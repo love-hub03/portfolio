@@ -2,13 +2,31 @@ import { useEffect, useState } from "react";
 import "./styles/Loading.css";
 import { useLoading } from "../context/LoadingProvider";
 
-import Marquee from "react-fast-marquee";
+/**
+ * Greetings from different languages — cycled while the loader is
+ * running. Add/remove entries freely; the cycler handles any length.
+ */
+const GREETINGS = [
+  "Hello",
+  "Namaste",
+  "Sat Sri Akal",
+  "Hola",
+  "Bonjour",
+  "Ciao",
+  "Konnichiwa",
+  "Annyeong",
+  "Salaam",
+  "Guten Tag",
+];
+/** How long each greeting is shown before it fades to the next one. */
+const GREETING_INTERVAL_MS = 420;
 
 const Loading = ({ percent }: { percent: number }) => {
   const { setIsLoading } = useLoading();
   const [loaded, setLoaded] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [greetingIdx, setGreetingIdx] = useState(0);
 
   if (percent >= 100) {
     setTimeout(() => {
@@ -32,6 +50,17 @@ const Loading = ({ percent }: { percent: number }) => {
       }
     });
   }, [isLoaded]);
+
+  // Cycle greetings while the loader is still visible. Stops the
+  // moment we start the exit transition (`clicked`) so the last
+  // greeting lingers during the reveal animation instead of flipping.
+  useEffect(() => {
+    if (clicked) return;
+    const id = window.setInterval(() => {
+      setGreetingIdx((i) => (i + 1) % GREETINGS.length);
+    }, GREETING_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [clicked]);
 
   function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
     const { currentTarget: target } = e;
@@ -60,12 +89,26 @@ const Loading = ({ percent }: { percent: number }) => {
         </div>
       </div>
       <div className="loading-screen">
-        <div className="loading-marquee">
-          <Marquee>
-            <span> A Creative Developer</span> <span>A Creative Designer</span>
-            <span> A Creative Developer</span> <span>A Creative Designer</span>
-          </Marquee>
+        {/* Greeting carousel — one large greeting at a time, centred.
+            The `key` forces a fresh mount each cycle so the fade-in
+            keyframe replays. aria-live keeps it announced without
+            stealing focus. */}
+        <div className="loading-greetings" aria-live="polite">
+          <span
+            key={greetingIdx}
+            className={`loading-greeting ${
+              clicked ? "loading-greeting-out" : ""
+            }`}
+          >
+            {GREETINGS[greetingIdx]}
+          </span>
         </div>
+
+        {/* Percentage pill — unchanged internal mechanism. It still
+            drives the click/expand transition into the main page via
+            the `loading-clicked` class. Only the position changed:
+            it now sits BELOW the greeting via the column flex layout
+            on .loading-screen. */}
         <div
           className={`loading-wrap ${clicked && "loading-clicked"}`}
           onMouseMove={(e) => handleMouseMove(e)}
